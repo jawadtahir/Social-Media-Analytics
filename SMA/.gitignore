@@ -1,0 +1,11 @@
+/bin/
+.metadata 
+/.classpath
+/jsonTweets.txt
+/jsonTweets.txt~
+/Log.txt
+/log.txt~
+/Log.txt~
+/tweets.txt
+/tweets.txt~
+/clusters/*

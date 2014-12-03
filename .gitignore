@@ -1,0 +1,35 @@
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+SMA/stanford_nlp.properties
+
+SMA/clusters/*.txt
+
+SMA/log.txt
+
+SMA/lib/stanford-corenlp-caseless-2014-02-25-models.jar
+
+SMA/jsonTweets.txt
+<<<<<<< HEAD
+SMA/Log.txt
+SMA/log.txt~
+SMA/Log.txt~
+SMA/tweets.txt
+=======
+SMA/jsonTweets.txt~
+SMA/Log.txt
+SMA/log.txt~
+SMA/Log.txt~
+SMA/tweets.txt
+SMA/tweets.txt~
+>>>>>>> branch 'master' of https://github.com/jawadtahir/Social-Media-Analytics
+SMA/clusters/*
