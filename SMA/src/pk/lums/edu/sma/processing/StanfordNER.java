@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class StanfordNER {
     static String password = "abc";
     static Connection con = null;
     static PreparedStatement pstTweetAll = null;
+    static ResultSet res = null;
 
     public StanfordNER() {
 	try {
@@ -43,6 +45,7 @@ public class StanfordNER {
 	IOUtils.log("*********************************************************************************");
 	IOUtils.log("************************************Program Start********************************");
 	IOUtils.log("*********************************************************************************");
+
 	try {
 	    con = DriverManager.getConnection(url, user, password);
 	} catch (Exception e) {
@@ -50,11 +53,13 @@ public class StanfordNER {
 	}
 	try {
 	    pstTweetAll = con.prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY);
+	    res = pstTweetAll.executeQuery();
+
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    IOUtils.log(e.getMessage());
-
 	}
+
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	// TODO Auto-generated method stub
 	// creates a StanfordCoreNLP object, with POS tagging, lemmatization,
@@ -74,7 +79,9 @@ public class StanfordNER {
 
 	StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-	String[] tweets = pk.lums.edu.sma.utils.IOUtils.readFile("tweets.txt");
+	// String[] tweets =
+	// pk.lums.edu.sma.utils.IOUtils.readFile("tweets.txt");
+	String[] tweets = TweetDO.getTextArrayOfColumn(res, "textTweet");
 
 	// Add your text here!
 	// props.put("annotators",

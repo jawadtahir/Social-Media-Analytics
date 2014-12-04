@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import pk.lums.edu.sma.utils.IOUtils;
+
 public class TweetDO {
 
     public static final String INSERT_QUERY = "INSERT INTO TWEETDATA.TWEETDTA (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
@@ -86,14 +88,17 @@ public class TweetDO {
 	return tweetArr;
     }
 
-    public static String getTextOfColumn(ResultSet res, String colomnName) {
-	String text = "";
+    public static String[] getTextArrayOfColumn(ResultSet res, String colomnName) {
+	ArrayList<String> textList = new ArrayList<String>();
 	try {
-	    text = res.getString(colomnName);
+	    while (res.next()) {
+		String text = res.getString(colomnName);
+		textList.add(text);
+	    }
 	} catch (SQLException e) {
-	    System.out.println(e.getMessage());
+	    IOUtils.log(e.getMessage());
 	}
-	return text;
+	return textList.toArray(new String[textList.size()]);
     }
 
 }
