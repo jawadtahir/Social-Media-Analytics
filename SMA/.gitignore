@@ -9,5 +9,8 @@
 /Log.txt~
 /tweets.txt
 /tweets.txt~
+/tweetsSmall.txt
+/tweetsSmall.txt~
 /clusters/*
 /.project
+/stanford_nlp.proprties
