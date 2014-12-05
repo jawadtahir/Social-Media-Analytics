@@ -26,7 +26,6 @@ public class GetEntities extends Thread {
     public GetEntities(String[] tweet, String tNumber) {
 	tweets = tweet;
 	t = new Thread(this, tNumber);
-	t.start();
     }
 
     public void run() {
@@ -64,14 +63,64 @@ public class GetEntities extends Thread {
 		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 		    String word = token.get(TextAnnotation.class);
 		    String pos = token.get(PartOfSpeechAnnotation.class);
-		    String ner = token.get(NamedEntityTagAnnotation.class);
+		    String ne = token.get(NamedEntityTagAnnotation.class);
+		    if (pos.equals("HT")) {
+			String ht = removeHash(word.toLowerCase().trim());
+			try {
+			    if (entities.containsKey(ht)) {
+				entities.put(ht, entities.get(ht) + 1);
+			    } else {
+				entities.put(ht, 1);
+			    }
+			} catch (Exception ex) {
+			    IOUtils.log(ex.getMessage());
+			    continue;
+			}
+		    }
+		    if (!ne.equals("O")) {
+			if (isEntity(ne)) {
+			    try {
+				if (entities.containsKey(word.toLowerCase())) {
+				    entities.put(
+					    word.toLowerCase().trim(),
+					    entities.get(word.toLowerCase()) + 1);
+				} else {
+				    entities.put(word.toLowerCase(), 1);
+				}
+			    } catch (Exception ex) {
+				IOUtils.log(ex.getMessage());
+			    }
+
+			}
+		    }
 		}
 	    }
 	}
+	HashMap<String, Integer> sortedEntities = (HashMap<String, Integer>) pk.lums.edu.sma.utils.IOUtils
+		.sortByValues(entities);
+	// System.out.println (sortedEntities.toString ());
+	IOUtils.log(sortedEntities.toString());
+
+	String[] topEntities = pk.lums.edu.sma.utils.IOUtils.getTopNEntities(
+		sortedEntities, (int) sortedEntities.size() / 2);
+	EntityCluster cluster = new EntityCluster(topEntities);
+	for (String tweet : tweets) {
+	    for (String entity : topEntities) {
+		if (tweet.toLowerCase().contains(entity)) {
+		    try {
+			cluster.putInCluster(entity, tweet);
+		    } catch (Exception ex) {
+			IOUtils.log(ex.getMessage());
+		    }
+		}
+	    }
+	}
+	cluster.writeCluster();
+	System.out.println("Thread " + this.getName() + " is completed");
     }
 
     /**
-     * Remove hash '#' before a string
+     * Remove hash sign '#' before a string
      * 
      * @param hashTag
      *            string hashtag

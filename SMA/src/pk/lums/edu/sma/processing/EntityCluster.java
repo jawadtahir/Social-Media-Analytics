@@ -45,9 +45,9 @@ public class EntityCluster {
 	if (!dir.exists()) {
 	    dir.mkdir();
 	}
-	for (File file : dir.listFiles()) {
-	    file.delete();
-	}
+	// for (File file : dir.listFiles()) {
+	// file.delete();
+	// }
 	Iterator<String> mapItr = clusters.keySet().iterator();
 	while (mapItr.hasNext()) {
 	    String clstrName = (String) mapItr.next();
@@ -57,7 +57,7 @@ public class EntityCluster {
 		txtToWrite.append(tweet + "\n");
 	    }
 	    IOUtils.writeFile(dir.getAbsolutePath() + "/" + clstrName + ".txt",
-		    txtToWrite.toString());
+		    txtToWrite.toString(), true);
 	}
     }
 }

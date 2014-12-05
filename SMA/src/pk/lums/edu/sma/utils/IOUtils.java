@@ -61,10 +61,14 @@ public class IOUtils {
 	}
     }
 
-    /*
+    /**
      * Java method to sort Map in Java by value e.g. HashMap or Hashtable throw
      * NullPointerException if Map contains null values It also sort values even
      * if they are duplicates
+     * 
+     * @param map
+     *            HashMap to sort
+     * @return Sorted HashMap
      */
     public static <K extends Comparable<String>, V extends Comparable<Integer>> Map<K, V> sortByValues(
 	    Map<K, V> map) {
@@ -100,12 +104,12 @@ public class IOUtils {
 	int i = 0;
 	ArrayList<String> entites = new ArrayList<String>();
 	while (itr.hasNext()) {
-	    String eNmae = (String) itr.next();
-	    entites.add(eNmae);
-	    i++;
 	    if (i == n) {
 		break;
 	    }
+	    String eNmae = (String) itr.next();
+	    entites.add(eNmae);
+	    i++;
 	}
 
 	return entites.toArray(new String[entites.size()]);
@@ -131,4 +135,13 @@ public class IOUtils {
 	IOUtils.writeFile("Log.txt", text, true);
     }
 
+    public static void clearClusterFolder() {
+	File dir = new File("clusters");
+	if (!dir.exists()) {
+	    return;
+	}
+	for (File file : dir.listFiles()) {
+	    file.delete();
+	}
+    }
 }
