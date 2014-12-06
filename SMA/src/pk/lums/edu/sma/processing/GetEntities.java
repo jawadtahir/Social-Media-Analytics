@@ -3,8 +3,8 @@ package pk.lums.edu.sma.processing;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import pk.lums.edu.sma.utils.IOUtils;
@@ -22,10 +22,13 @@ public class GetEntities extends Thread {
 
     private Thread t;
     private String[] tweets;
+    private Map<String, Integer> entities;
 
-    public GetEntities(String[] tweet, String tNumber) {
-	tweets = tweet;
-	t = new Thread(this, tNumber);
+    public GetEntities(String[] tweet, String tNumber,
+	    Map<String, Integer> entityMap) {
+	this.tweets = tweet;
+	this.entities = entityMap;
+	this.t = new Thread(this, tNumber);
     }
 
     public void run() {
@@ -35,9 +38,7 @@ public class GetEntities extends Thread {
     private void process() {
 	// Make properties object to hold properties for Stanford NLP
 	Properties props = new Properties();
-	// props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
 	InputStream inStream = null;
-	HashMap<String, Integer> entities = new HashMap<String, Integer>();
 	int count = 0;
 	// Read properties
 	try {
@@ -47,17 +48,21 @@ public class GetEntities extends Thread {
 	    IOUtils.log("Properties not found");
 	}
 	StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-	// run annotation on all documents
 	for (String tweet : tweets) {
 	    if (tweet == null) {
 		continue;
 	    }
-	    Annotation document = new Annotation(tweet);
 	    if (pipeline == null) {
 		continue;
 	    }
+	    count++;
+	    IOUtils.log("Thread " + this.getName() + " : Count : " + count
+		    + " Tweet : " + tweet);
+	    // run annotation on all documents
+	    Annotation document = new Annotation(tweet);
 	    pipeline.annotate(document);
 
+	    // Get all sentences
 	    List<CoreMap> sentences = document.get(SentencesAnnotation.class);
 	    for (CoreMap sentence : sentences) {
 		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
@@ -96,27 +101,28 @@ public class GetEntities extends Thread {
 		}
 	    }
 	}
-	HashMap<String, Integer> sortedEntities = (HashMap<String, Integer>) pk.lums.edu.sma.utils.IOUtils
-		.sortByValues(entities);
-	// System.out.println (sortedEntities.toString ());
-	IOUtils.log(sortedEntities.toString());
-
-	String[] topEntities = pk.lums.edu.sma.utils.IOUtils.getTopNEntities(
-		sortedEntities, (int) sortedEntities.size() / 2);
-	EntityCluster cluster = new EntityCluster(topEntities);
-	for (String tweet : tweets) {
-	    for (String entity : topEntities) {
-		if (tweet.toLowerCase().contains(entity)) {
-		    try {
-			cluster.putInCluster(entity, tweet);
-		    } catch (Exception ex) {
-			IOUtils.log(ex.getMessage());
-		    }
-		}
-	    }
-	}
-	cluster.writeCluster();
-	System.out.println("Thread " + this.getName() + " is completed");
+	// HashMap<String, Integer> sortedEntities = (HashMap<String, Integer>)
+	// pk.lums.edu.sma.utils.IOUtils
+	// .sortByValues(entities);
+	// // System.out.println (sortedEntities.toString ());
+	// IOUtils.log(sortedEntities.toString());
+	//
+	// String[] topEntities = pk.lums.edu.sma.utils.IOUtils.getTopNEntities(
+	// sortedEntities, (int) sortedEntities.size() / 2);
+	// EntityCluster cluster = new EntityCluster(topEntities);
+	// for (String tweet : tweets) {
+	// for (String entity : topEntities) {
+	// if (tweet.toLowerCase().contains(entity)) {
+	// try {
+	// cluster.putInCluster(entity, tweet);
+	// } catch (Exception ex) {
+	// IOUtils.log(ex.getMessage());
+	// }
+	// }
+	// }
+	// }
+	// cluster.writeCluster();
+	IOUtils.log("Thread " + this.getName() + " is completed");
     }
 
     /**

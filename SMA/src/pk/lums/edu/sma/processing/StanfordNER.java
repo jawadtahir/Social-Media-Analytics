@@ -79,9 +79,8 @@ public class StanfordNER {
 
 	StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-	// String[] tweets =
-	// pk.lums.edu.sma.utils.IOUtils.readFile("tweets.txt");
-	String[] tweets = TweetDO.getTextArrayOfColumn(res, "textTweet");
+	String[] tweets = pk.lums.edu.sma.utils.IOUtils.readFile("tweets.txt");
+	// String[] tweets = TweetDO.getTextArrayOfColumn(res, "textTweet");
 
 	// Add your text here!
 	// props.put("annotators",

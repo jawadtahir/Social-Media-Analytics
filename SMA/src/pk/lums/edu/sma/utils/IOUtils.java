@@ -5,10 +5,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -18,6 +20,10 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class IOUtils {
+    private static final String url = "jdbc:mysql://localhost:3306/TWEETDATA";
+    private static final String user = "root";
+    private static final String password = "abc";
+
     public static String[] readFile(String filePath) {
 	String[] ret = null;
 	List<String> lines = null;
@@ -35,19 +41,28 @@ public class IOUtils {
 	return ret;
     }
 
+    /**
+     * Append given text to given file path
+     * 
+     * @param filePath
+     *            File path to write
+     * @param text
+     *            text to write
+     */
     public static void writeFile(String filePath, String text) {
-	try {
-	    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(
-		    filePath, true));
-	    bufferedWriter.write(text.trim());
-	    bufferedWriter.newLine();
-	    bufferedWriter.close();
-	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+	writeFile(filePath, text, true);
     }
 
+    /**
+     * Write given text to given file
+     * 
+     * @param filePath
+     *            path to write
+     * @param text
+     *            text to write
+     * @param isAppend
+     *            true or false
+     */
     public static void writeFile(String filePath, String text, boolean isAppend) {
 	try {
 	    BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(
@@ -99,7 +114,17 @@ public class IOUtils {
 	return sortedMap;
     }
 
-    public static String[] getTopNEntities(HashMap<String, Integer> map, int n) {
+    /**
+     * get top n number of entries from map
+     * 
+     * @param map
+     *            map from which we have to chose entries
+     * @param n
+     *            number of entries to chose
+     * @return top n number of entries from map, in map format
+     */
+
+    public static String[] getTopNEntities(Map<String, Integer> map, int n) {
 	Iterator<String> itr = map.keySet().iterator();
 	int i = 0;
 	ArrayList<String> entites = new ArrayList<String>();
@@ -135,6 +160,9 @@ public class IOUtils {
 	IOUtils.writeFile("Log.txt", text, true);
     }
 
+    /**
+     * Clears clusters folder
+     */
     public static void clearClusterFolder() {
 	File dir = new File("clusters");
 	if (!dir.exists()) {
@@ -143,5 +171,15 @@ public class IOUtils {
 	for (File file : dir.listFiles()) {
 	    file.delete();
 	}
+    }
+
+    /**
+     * Get connection for tweet DB
+     * 
+     * @return
+     * @throws SQLException
+     */
+    public static Connection getConnection() throws SQLException {
+	return DriverManager.getConnection(url, user, password);
     }
 }

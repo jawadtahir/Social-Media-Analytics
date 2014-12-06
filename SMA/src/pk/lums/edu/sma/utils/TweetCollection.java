@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -25,9 +24,6 @@ import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 
 public class TweetCollection {
-    static private String user = "root";
-    static private String pass = "abc";
-    static String url = "jdbc:mysql://localhost:3306/TWEETDATA";
     static String apiKey;
     static String apiSecret;
     static Integer count = 0;
@@ -155,7 +151,7 @@ public class TweetCollection {
     public static void main(String[] args) {
 	// String[] jsonTweet = IOUtils.readFile("jsonTweets.txt");
 	try {
-	    con = DriverManager.getConnection(url, user, pass);
+	    con = IOUtils.getConnection();
 	    pst = con.prepareStatement(TweetDO.INSERT_QUERY);
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block

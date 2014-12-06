@@ -10,7 +10,7 @@ public class TweetDO {
 
     public static final String INSERT_QUERY = "INSERT INTO TWEETDATA.TWEETDTA (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
     public static final String SELECT_ALL_TEXT_QUERY = "SELECT textTweet FROM TWEETDATA.TWEETDTA";
-    public static final String SELECT_TEXT_LIKE = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTA where textTweet like ?";
+    public static final String SELECT_TEXT_LIKE = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTA where textTweet like ?";
 
     private long id = 0;
     private String jsonTweet = "";
@@ -67,7 +67,7 @@ public class TweetDO {
 	this.tweetIDTweet = tweetIDTweet;
     }
 
-    public static ArrayList<TweetDO> translateTweet(ResultSet res) {
+    public static ArrayList<TweetDO> translateAllTweetDO(ResultSet res) {
 	ArrayList<TweetDO> tweetArr = new ArrayList<TweetDO>();
 	if (res != null) {
 	    try {
@@ -89,7 +89,28 @@ public class TweetDO {
 	return tweetArr;
     }
 
-    public static String[] getTextArrayOfColumn(ResultSet res, String colomnName) {
+    public static ArrayList<TweetDO> translateTextIdDateLocTweetDO(ResultSet res) {
+	ArrayList<TweetDO> tweetArr = new ArrayList<TweetDO>();
+	if (res != null) {
+	    try {
+		while (res.next()) {
+		    TweetDO tdo = new TweetDO();
+		    tdo.setId(res.getLong("idTWEETDTA"));
+		    tdo.setTextTweet(res.getString("textTweet"));
+		    tdo.setDateTextTweet(res.getString("dateTextTweet"));
+		    tdo.setLocTweet(res.getString("locationTweet"));
+		    tweetArr.add(tdo);
+		}
+	    } catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	}
+	return tweetArr;
+    }
+
+    public static ArrayList<String> getTextArrayOfColumn(ResultSet res,
+	    String colomnName) {
 	ArrayList<String> textList = new ArrayList<String>();
 	try {
 	    while (res.next()) {
@@ -99,7 +120,7 @@ public class TweetDO {
 	} catch (SQLException e) {
 	    IOUtils.log(e.getMessage());
 	}
-	return textList.toArray(new String[textList.size()]);
+	return textList;
     }
 
 }
