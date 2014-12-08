@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
 
-public class ProcessEntities {
+public class ProcessEntities extends Thread {
 
     private String[] entities = null;
     private EntityCluster cluster = null;
@@ -17,9 +17,21 @@ public class ProcessEntities {
     private PreparedStatement pst = null;
     private ResultSet res = null;
     private ArrayList<TweetDO> tweetArr = null;
+    private Thread t = null;
 
-    public ProcessEntities(String[] entities) {
+    public ProcessEntities(String[] entities, int threadCount) {
 	this.entities = entities;
+	t = new Thread(this, Integer.toString(threadCount));
+    }
+
+    @Override
+    public void run() {
+	try {
+	    process();
+	} catch (SQLException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 
     void process() throws SQLException {
@@ -28,17 +40,22 @@ public class ProcessEntities {
 	pst = con.prepareStatement(TweetDO.SELECT_TEXT_LIKE);
 	cluster = new EntityCluster(entities);
 	IOUtils.log("Processing entities....");
+	int count = 0;
 	// Processing entities....
 	for (String entity : entities) {
-	    IOUtils.log("Entity: " + entity);
-	    pst.setString(1, "%" + entity + "%");
-	    res = pst.executeQuery();
-	    tweetArr = TweetDO.translateTextIdDateLocTweetDO(res);
-	    for (TweetDO tdo : tweetArr) {
-		String text = tdo.getTextTweet() + " , "
-			+ tdo.getDateTextTweet() + " , " + tdo.getId() + " , "
-			+ tdo.getLocTweet();
-		cluster.putInCluster(entity, text);
+	    count++;
+	    if (!(entity.equals("") || entity == null || entity.length() == 1)) {
+		IOUtils.log("Entity: " + entity + "\tCount: " + count
+			+ "\tThread: " + this.getName());
+		pst.setString(1, "%" + entity + "%");
+		res = pst.executeQuery();
+		tweetArr = TweetDO.translateTextIdDateLocTweetDO(res);
+		for (TweetDO tdo : tweetArr) {
+		    String text = tdo.getTextTweet() + " , "
+			    + tdo.getDateTextTweet() + " , " + tdo.getId()
+			    + " , " + tdo.getLocTweet();
+		    cluster.putInCluster(entity.trim(), text);
+		}
 	    }
 	}
 	cluster.writeCluster();

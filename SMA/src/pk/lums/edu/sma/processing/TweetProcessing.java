@@ -54,6 +54,7 @@ public class TweetProcessing {
 	int noOfTweetsPerThread = strTwtList.size() / NO_OF_THREADS;
 	ArrayList<GetEntities> threadList = new ArrayList<GetEntities>();
 	IOUtils.log("Creating threads....");
+
 	// Creating threads
 	for (int i = 0; i < NO_OF_THREADS; i++) {
 	    String[] tweetsForThread = getNextMelements(
@@ -63,7 +64,7 @@ public class TweetProcessing {
 	    threadList.add(thread);
 	}
 
-	IOUtils.log("Stratign threads....");
+	IOUtils.log("Strating threads....");
 
 	// Starting threads...
 	for (GetEntities thread : threadList) {
@@ -91,12 +92,12 @@ public class TweetProcessing {
 	IOUtils.log(entityMap.toString());
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
-	ProcessEntities proEnt = new ProcessEntities(topEntities);
+	ProcessEntities proEnt = new ProcessEntities(topEntities, 1);
 	boolean completed = false;
 	// Creating clusters
 	while (completed == false) {
 	    try {
-		proEnt.process();
+		proEnt.start();
 		completed = true;
 	    } catch (Exception e) {
 		// TODO: handle exception

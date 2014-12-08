@@ -20,7 +20,7 @@ public class EntityCluster {
     }
 
     public void putInCluster(String cluster, String entry) {
-	ArrayList<String> entries = clusters.get(cluster);
+	ArrayList<String> entries = clusters.get(cluster.trim());
 	entries.add(entry);
     }
 
