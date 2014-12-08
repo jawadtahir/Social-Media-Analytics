@@ -45,8 +45,8 @@ public class ProcessEntities extends Thread {
 	for (String entity : entities) {
 	    count++;
 	    if (!(entity.equals("") || entity == null || entity.length() == 1)) {
-		IOUtils.log("Entity: " + entity + "\tCount: " + count
-			+ "\tThread: " + this.getName());
+		IOUtils.log("Entity: " + entity + "\t\tCount: " + count
+			+ "\t\tThread: " + this.getName());
 		pst.setString(1, "%" + entity + "%");
 		res = pst.executeQuery();
 		tweetArr = TweetDO.translateTextIdDateLocTweetDO(res);
