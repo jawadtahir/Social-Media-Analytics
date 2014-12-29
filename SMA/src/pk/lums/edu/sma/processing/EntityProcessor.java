@@ -10,6 +10,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 10;
+    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
 
@@ -34,7 +35,7 @@ public class EntityProcessor {
 	}
 	entityMap = IOUtils.sortByValues(entityMap);
 	String[] topEntities = IOUtils.getTopNEntities(entityMap,
-		entityMap.size() / 4);
+		entityMap.size() / FRACTION_OF_TWEETS_TO_PROCESS);
 	for (String entity : topEntities) {
 	    topEntList.add(entity.trim());
 	}

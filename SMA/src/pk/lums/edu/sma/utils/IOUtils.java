@@ -20,9 +20,9 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class IOUtils {
-    private static final String url = "jdbc:mysql://localhost:3306/TWEETDATA";
-    private static final String user = "root";
-    private static final String password = "abc";
+    private static final String url = "jdbc:mysql://10.101.72.14:3306/TWEETDATA";
+    private static final String user = "jawad2";
+    private static final String password = "abc123";
 
     public static String[] readFile(String filePath) {
 	String[] ret = null;

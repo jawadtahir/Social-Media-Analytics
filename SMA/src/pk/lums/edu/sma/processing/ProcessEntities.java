@@ -38,11 +38,12 @@ public class ProcessEntities extends Thread {
 	// Getting DB connection
 	con = IOUtils.getConnection();
 	pst = con.prepareStatement(TweetDO.SELECT_TEXT_LIKE);
-	cluster = new EntityCluster(entities);
+	// cluster = new EntityCluster(entities);
 	IOUtils.log("Processing entities....");
 	int count = 0;
 	// Processing entities....
 	for (String entity : entities) {
+	    cluster = new EntityCluster(new String[] { entity });
 	    count++;
 	    if (!(entity.equals("") || entity == null || entity.length() == 1)) {
 		IOUtils.log("Entity: " + entity + "\t\tCount: " + count
@@ -51,13 +52,13 @@ public class ProcessEntities extends Thread {
 		res = pst.executeQuery();
 		tweetArr = TweetDO.translateTextIdDateLocTweetDO(res);
 		for (TweetDO tdo : tweetArr) {
-		    String text = tdo.getTextTweet() + " , "
-			    + tdo.getDateTextTweet() + " , " + tdo.getId()
-			    + " , " + tdo.getLocTweet();
+		    String text = tdo.getTextTweet().trim() + " , "
+			    + tdo.getDateTextTweet().trim() + " , "
+			    + tdo.getId() + " , " + tdo.getLocTweet().trim();
 		    cluster.putInCluster(entity.trim(), text);
 		}
 	    }
+	    cluster.writeCluster();
 	}
-	cluster.writeCluster();
     }
 }
