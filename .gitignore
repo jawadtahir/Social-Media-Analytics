@@ -19,17 +19,14 @@ SMA/log.txt
 SMA/lib/stanford-corenlp-caseless-2014-02-25-models.jar
 
 SMA/jsonTweets.txt
-<<<<<<< HEAD
 SMA/Log.txt
 SMA/log.txt~
 SMA/Log.txt~
 SMA/tweets.txt
-=======
 SMA/jsonTweets.txt~
 SMA/Log.txt
 SMA/log.txt~
 SMA/Log.txt~
 SMA/tweets.txt
 SMA/tweets.txt~
->>>>>>> branch 'master' of https://github.com/jawadtahir/Social-Media-Analytics
 SMA/clusters/*
