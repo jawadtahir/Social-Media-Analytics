@@ -10,7 +10,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 10;
-    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
+    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 5;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
 
@@ -26,7 +26,7 @@ public class EntityProcessor {
 	    if (entity.length() > 3) {
 		System.out.println(entity);
 		String[] keyVal = entity.split("=");
-		if (keyVal.length == 2 && keyVal[0].trim().length() > 1) {
+		if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
 		    String key = keyVal[0].trim();
 		    int val = Integer.parseInt(keyVal[1]);
 		    entityMap.put(key, val);
@@ -84,5 +84,18 @@ public class EntityProcessor {
 	    retList.add(tweet);
 	}
 	return retList.toArray(new String[retList.size()]);
+    }
+
+    private static double cosSim(double[] a, double[] b) {
+	double dotp = 0, maga = 0, magb = 0;
+	for (int i = 0; i < a.length; i++) {
+	    dotp += a[i] * b[i];
+	    maga += Math.pow(a[i], 2);
+	    magb += Math.pow(b[i], 2);
+	}
+	maga = Math.sqrt(maga);
+	magb = Math.sqrt(magb);
+	double d = dotp / (maga * magb);
+	return d == Double.NaN ? 0 : d;
     }
 }
