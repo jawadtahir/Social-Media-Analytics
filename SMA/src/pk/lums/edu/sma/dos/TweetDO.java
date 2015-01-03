@@ -10,6 +10,7 @@ public class TweetDO {
 
     public static final String INSERT_QUERY = "INSERT INTO TWEETDATA.TWEETDTA (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
     public static final String SELECT_ALL_TEXT_QUERY = "SELECT textTweet FROM TWEETDATA.TWEETDTA";
+    public static final String SELECT_ALL_ID_TEXT_QUERY = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTA";
     public static final String SELECT_TEXT_LIKE = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTA where textTweet like ?";
 
     private long id = 0;
@@ -121,6 +122,24 @@ public class TweetDO {
 	    IOUtils.log(e.getMessage());
 	}
 	return textList;
+    }
+
+    public static ArrayList<TweetDO> translateTextIdTweetDO(ResultSet res) {
+	ArrayList<TweetDO> tweetArr = new ArrayList<TweetDO>();
+	if (res != null) {
+	    try {
+		while (res.next()) {
+		    TweetDO tdo = new TweetDO();
+		    tdo.setId(res.getLong("idTWEETDTA"));
+		    tdo.setTextTweet(res.getString("textTweet"));
+		    tweetArr.add(tdo);
+		}
+	    } catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
+	}
+	return tweetArr;
     }
 
 }
