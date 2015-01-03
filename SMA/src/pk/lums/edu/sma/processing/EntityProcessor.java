@@ -1,10 +1,13 @@
 package pk.lums.edu.sma.processing;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityProcessor {
@@ -38,6 +41,14 @@ public class EntityProcessor {
 		entityMap.size() / FRACTION_OF_TWEETS_TO_PROCESS);
 	for (String entity : topEntities) {
 	    topEntList.add(entity.trim());
+	}
+
+	try {
+	    ResultSet res = IOUtils.getConnection()
+		    .prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY)
+		    .executeQuery();
+
+	} catch (SQLException e) {
 	}
 
 	IOUtils.log("Creating threads....");
@@ -84,6 +95,17 @@ public class EntityProcessor {
 	    retList.add(tweet);
 	}
 	return retList.toArray(new String[retList.size()]);
+    }
+
+    private static int[] getVecSpace(String tweet) {
+	int[] vecSpace = new int[topEntList.size()];
+	int i = 0;
+	for (String ent : topEntList) {
+	    vecSpace[i] = org.apache.commons.lang3.StringUtils.countMatches(
+		    tweet, ent);
+	    i++;
+	}
+	return vecSpace;
     }
 
     private static double cosSim(double[] a, double[] b) {
