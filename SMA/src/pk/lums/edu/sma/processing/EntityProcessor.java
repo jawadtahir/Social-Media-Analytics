@@ -1,7 +1,11 @@
 package pk.lums.edu.sma.processing;
 
+import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -25,6 +29,7 @@ public class EntityProcessor {
     private static final int FRACTION_OF_TWEETS_TO_PROCESS = 5;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
+    private static DecimalFormat df = new DecimalFormat("#.####");
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
@@ -62,21 +67,23 @@ public class EntityProcessor {
 	} catch (SQLException e) {
 	}
 
-	tweets = tweets.subList(0, 100);
+	// tweets = tweets.subList(0, 100);
 
-	LinkedHashMap<Long, double[]> vecSpaceList = new LinkedHashMap<Long, double[]>();
+	LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
 	for (Iterator<TweetDO> it = tweets.iterator(); it.hasNext();) {
 	    TweetDO tdo = it.next();
 	    double[] temp = getVecSpace(tdo.getTextTweet());
 	    if (temp != null) {
-		vecSpaceList.put(tdo.getId(), temp);
+		vecSpaceList.put((int) tdo.getId(), temp);
 	    } else {
 		it.remove();
 	    }
 	}
 
-	kmean(tweets, vecSpaceList, 5);
+	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
+		vecSpaceList, 5);
+	printClusters(cluster);
 
 	// IOUtils.log("Creating threads....");
 	// int noOfEntityPerThread = (int) topEntities.length / NO_OF_THREADS;
@@ -105,6 +112,62 @@ public class EntityProcessor {
 	// IOUtils.log("All threads completed their work!");
     }
 
+    private static void printClusters(
+	    HashMap<double[], SortedSet<Integer>> cluster) {
+	// TODO Auto-generated method stub
+	IOUtils.clearClusterFolder();
+	Iterator<double[]> itr = cluster.keySet().iterator();
+	Connection con = null;
+	PreparedStatement pst = null;
+	try {
+	    con = IOUtils.getConnection();
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	int i = 0;
+	while (itr.hasNext()) {
+	    double[] key = itr.next();
+	    SortedSet<Integer> tweets = cluster.get(key);
+	    Iterator<Integer> setItr = tweets.iterator();
+	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
+	    i++;
+	    while (setItr.hasNext()) {
+		int id = setItr.next();
+		try {
+		    pst.setInt(1, id);
+		    List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+			    .executeQuery());
+		    tdoList.add(tempList.get(0));
+		} catch (SQLException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+	    }
+
+	    printCluster(tdoList, i);
+	}
+
+    }
+
+    private static void printCluster(List<TweetDO> tdoList, int i) {
+	// TODO Auto-generated method stub
+	File file = new File("clusters");
+	if (!file.exists()) {
+	    file.mkdir();
+	}
+	StringBuilder sb = new StringBuilder();
+	for (int j = 0; j < tdoList.size(); j++) {
+	    TweetDO tdo = tdoList.get(j);
+	    sb.append(tdo.getTextTweet().trim() + " , "
+		    + tdo.getDateTextTweet().trim() + " , " + tdo.getId()
+		    + " , " + tdo.getLocTweet().trim() + "\n");
+	}
+	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
+		.toString().trim());
+
+    }
+
     /**
      * This function get the next offset element from topEntList starting from
      * an index
@@ -115,12 +178,15 @@ public class EntityProcessor {
      *            number of elements to get
      * @return string array ranging from [strtIndex : strtIndex + offset
      */
-    private static LinkedHashMap<Long, double[]> getNextMelements(
-	    int strtIndex, int offset, LinkedHashMap<Long, double[]> list) {
-	list.LinkedHashMap<Long, double[]> retList = new LinkedHashMap<Long, double[]>();
-	for (int i = 0; i < offset; i++) {
-	    double[] vecSpace = list.get(strtIndex + i);
-	    retList.add(vecSpace);
+    private static LinkedHashMap<Integer, double[]> getNextMelements(
+	    int strtIndex, int offset, LinkedHashMap<Integer, double[]> list) {
+	LinkedHashMap<Integer, double[]> retList = new LinkedHashMap<Integer, double[]>();
+	long i = 0;
+	for (Map.Entry<Integer, double[]> entry : list.entrySet()) {
+	    if (i < (strtIndex + offset) && i >= (strtIndex)) {
+		retList.put(entry.getKey(), entry.getValue());
+	    }
+	    i++;
 	}
 	return retList;
     }
@@ -162,8 +228,9 @@ public class EntityProcessor {
 	return str.split(Pattern.quote(subStr), -1).length - 1;
     }
 
-    private static void kmean(List<TweetDO> tweets,
-	    LinkedHashMap<Long, double[]> vecspace, int k) {
+    private static HashMap<double[], SortedSet<Integer>> kmean(
+	    List<TweetDO> tweets, LinkedHashMap<Integer, double[]> vecspace,
+	    int k) {
 	Map<double[], SortedSet<Integer>> clusters = new HashMap<double[], SortedSet<Integer>>();
 	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
@@ -174,8 +241,11 @@ public class EntityProcessor {
 	    step.clear();
 	    rand.clear();
 	    // randomly initialize cluster centers
-	    while (rand.size() < k)
-		rand.add((int) (Math.random() * vecspace.size()));
+	    while (rand.size() < k) {
+		int randNo = (int) (Math.random() * vecspace.size());
+		if (vecspace.get(randNo) != null)
+		    rand.add(randNo);
+	    }
 	    for (int r : rand) {
 		double[] temp = new double[vecspace.get(r).length];
 		System.arraycopy(vecspace.get(r), 0, temp, 0, temp.length);
@@ -189,15 +259,17 @@ public class EntityProcessor {
 		// cluster assignment step
 		int noOfVecSpPrThread = vecspace.size() / NO_OF_THREADS;
 		for (int i = 0; i < NO_OF_THREADS; i++) {
-		    List<double[]> VecSpace = getNextMelements(i
-			    * noOfVecSpPrThread, noOfVecSpPrThread, vecspace);
+		    LinkedHashMap<Integer, double[]> VecSpace = getNextMelements(
+			    i * noOfVecSpPrThread, noOfVecSpPrThread, vecspace);
 		    assThrdLst.add(new KmeanAssignmentThread(i, VecSpace,
 			    clusters));
 		    if (i == NO_OF_THREADS - 1) {
 			if ((i + 1) * noOfVecSpPrThread < vecspace.size()) {
-			    List<double[]> VecSpacen = getNextMelements((i + 1)
-				    * noOfVecSpPrThread, vecspace.size()
-				    - ((i + 1) * noOfVecSpPrThread), vecspace);
+			    LinkedHashMap<Integer, double[]> VecSpacen = getNextMelements(
+				    (i + 1) * noOfVecSpPrThread,
+				    vecspace.size()
+					    - ((i + 1) * noOfVecSpPrThread),
+				    vecspace);
 			    assThrdLst.add(new KmeanAssignmentThread(i + 1,
 				    VecSpacen, clusters));
 			}
@@ -226,8 +298,11 @@ public class EntityProcessor {
 			for (int i = 0; i < updatec.length; i++)
 			    updatec[i] += doc[i];
 		    }
-		    for (int i = 0; i < updatec.length; i++)
-			updatec[i] /= clusters.get(cent).size();
+		    for (int i = 0; i < updatec.length; i++) {
+			double temp = Double.parseDouble(df.format(updatec[i]
+				/ clusters.get(cent).size()));
+			updatec[i] = temp;
+		    }
 		    step.put(updatec, new TreeSet<Integer>());
 		}
 		// check break conditions
@@ -266,14 +341,9 @@ public class EntityProcessor {
 	System.out.println("Best Convergence:");
 	System.out.println(errorsums.get(errorsums.lastKey()).toString()
 		.replaceAll("\\[[\\w@]+=", ""));
-	System.out.print("{");
-	for (double[] cent : errorsums.get(errorsums.lastKey()).keySet()) {
-	    System.out.print("[");
-	    for (int pts : errorsums.get(errorsums.lastKey()).get(cent)) {
-		System.out.print(tweets.get(pts).getId() + ", ");
-	    }
-	    System.out.print("\b\b], ");
-	}
-	System.out.println("\b\b}");
+	HashMap<double[], SortedSet<Integer>> con = errorsums.get(errorsums
+		.lastKey());
+	return con;
+
     }
 }
