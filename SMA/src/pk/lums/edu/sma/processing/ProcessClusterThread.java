@@ -216,7 +216,7 @@ public class ProcessClusterThread extends Thread {
 		    date = df.parse(time);
 		    sb = new StringBuilder();
 		    for (int i = 0; i <= tweetEntArr.length - 4; i++) {
-			sb.append(tweetEntArr[0]);
+			sb.append(tweetEntArr[i]);
 		    }
 		    if (isInRange(date, dateRange)) {
 			ClusterModel cModel = new ClusterModel(sb.toString(),
@@ -249,7 +249,7 @@ public class ProcessClusterThread extends Thread {
 		    date = df.parse(time);
 		    sb = new StringBuilder();
 		    for (int i = 0; i <= tweetEntArr.length - 4; i++) {
-			sb.append(tweetEntArr[0]);
+			sb.append(tweetEntArr[i]);
 		    }
 		    ClusterModel cModel = new ClusterModel(sb.toString(), date,
 			    clusterName, Integer.parseInt(id));

@@ -34,6 +34,7 @@ public class EntityProcessor {
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
 	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Processing entities...");
 	String[] entityLine = IOUtils.readFile("Entities.txt");
 	String csvEntities = entityLine[0].substring(1);
 	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
@@ -41,7 +42,7 @@ public class EntityProcessor {
 	Map<String, Integer> entityMap = new HashMap<String, Integer>();
 	for (String entity : entityArr) {
 	    if (entity.length() > 3) {
-		System.out.println(entity);
+		// System.out.println(entity);
 		String[] keyVal = entity.split("=");
 		if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
 		    String key = keyVal[0].trim();
@@ -57,6 +58,8 @@ public class EntityProcessor {
 	    topEntList.add(entity.trim());
 	}
 
+	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Selecting all tweets...");
 	List<TweetDO> tweets = null;
 	try {
 	    ResultSet res = IOUtils.getConnection()
@@ -69,9 +72,15 @@ public class EntityProcessor {
 
 	// tweets = tweets.subList(0, 100);
 
+	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Creating vector space of all tweets...");
 	LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
+	int count = 0;
 	for (Iterator<TweetDO> it = tweets.iterator(); it.hasNext();) {
+	    count++;
+	    if (count % 1000 == 0)
+		IOUtils.log(Integer.toString(count));
 	    TweetDO tdo = it.next();
 	    double[] temp = getVecSpace(tdo.getTextTweet());
 	    if (temp != null) {
@@ -81,9 +90,14 @@ public class EntityProcessor {
 	    }
 	}
 
+	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Going for main course...");
 	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
-		vecSpaceList, 5);
+		vecSpaceList, 10);
+	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Printing clusters...");
 	printClusters(cluster);
+	IOUtils.log(Calendar.getInstance().getTime().toString());
 
 	// IOUtils.log("Creating threads....");
 	// int noOfEntityPerThread = (int) topEntities.length / NO_OF_THREADS;
@@ -191,6 +205,16 @@ public class EntityProcessor {
 	return retList;
     }
 
+    private static List<TweetDO> getNextMelements(int strtIndex, int offset,
+	    List<TweetDO> tweets) {
+	List<TweetDO> retList = new ArrayList<TweetDO>();
+	for (int i = strtIndex; i < (strtIndex + offset); i++) {
+	    TweetDO tdo = tweets.get(i);
+	    retList.add(tdo);
+	}
+	return retList;
+    }
+
     private static double[] getVecSpace(String tweet) {
 	double[] vecSpace = new double[topEntList.size()];
 	int i = 0;
@@ -235,8 +259,9 @@ public class EntityProcessor {
 	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
-	int maxiter = 10;
+	int maxiter = 20;
 	for (int init = 0; init < 3; init++) {
+	    IOUtils.log("Round : " + init);
 	    clusters.clear();
 	    step.clear();
 	    rand.clear();
@@ -254,6 +279,7 @@ public class EntityProcessor {
 	    boolean go = true;
 	    int iter = 0;
 	    while (go) {
+		IOUtils.log("Iter : " + iter);
 		clusters = new HashMap<double[], SortedSet<Integer>>(step);
 		List<KmeanAssignmentThread> assThrdLst = new ArrayList<KmeanAssignmentThread>();
 		// cluster assignment step
