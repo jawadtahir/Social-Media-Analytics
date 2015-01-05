@@ -10,11 +10,12 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class ClusterWordCountThread extends Thread {
     private Thread t;
     private File fileName;
-    private Map<String, Integer> wordCount;
+    private Map<String, Integer> entMap;
 
     public ClusterWordCountThread(int threadCount, File fileName,
 	    Map<String, Integer> map) {
 	this.fileName = fileName;
+	this.entMap = map;
 	this.t = new Thread(this, Integer.toString(threadCount));
     }
 
@@ -24,20 +25,31 @@ public class ClusterWordCountThread extends Thread {
 
     private void process() {
 	// TODO Auto-generated method stub
+	Map<String, Integer> wordCount = null;
 	wordCount = new HashMap<String, Integer>();
 	String[] tweetEnts = IOUtils.readFile(this.fileName.getAbsolutePath());
 	for (String tweetEnt : tweetEnts) {
 	    TweetDO tdo = stringToDO(tweetEnt);
-	    String[] subStrs = tdo.getTextTweet().split(" ");
-	    for (String string : subStrs) {
-		if (wordCount.containsKey(string)) {
-		    wordCount.put(string, wordCount.get(string) + 1);
-		} else {
-		    wordCount.put(string, 1);
+	    if (tdo != null) {
+		String[] subStrs = tdo.getTextTweet().split(" ");
+		for (String string : subStrs) {
+		    string = string.toLowerCase().trim();
+		    if (entMap.containsKey(string.toLowerCase().trim())) {
+			if (wordCount.containsKey(string)) {
+			    wordCount.put(string, wordCount.get(string) + 1);
+			} else {
+			    wordCount.put(string, 1);
+			}
+		    }
 		}
 	    }
 	}
-	IOUtils.writeFile(fileName.getName(), wordCount.toString(), true);
+	wordCount = IOUtils.sortByValues(wordCount);
+	// IOUtils.writeFile(fileName.getName(), wordCount.toString(), true);
+
+	ChartCreator cc = new ChartCreator(wordCount, fileName.getName()
+		.substring(0, fileName.getName().length() - 4));
+	cc.create();
 
     }
 
