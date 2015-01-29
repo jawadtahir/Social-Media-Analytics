@@ -92,18 +92,20 @@ public class TweetProcessing {
 	IOUtils.log(entityMap.toString());
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
-	ProcessEntities proEnt = new ProcessEntities(topEntities, 1);
-	boolean completed = false;
+	// EntityProcessor ep = new EntityProcessor();
+	// ep.process(entityMap);
+	// ProcessEntities proEnt = new ProcessEntities(topEntities, 1);
+	// boolean completed = false;
 	// Creating clusters
-	while (completed == false) {
-	    try {
-		proEnt.start();
-		completed = true;
-	    } catch (Exception e) {
-		// TODO: handle exception
-		e.printStackTrace();
-	    }
-	}
+	// while (completed == false) {
+	// try {
+	// proEnt.start();
+	// completed = true;
+	// } catch (Exception e) {
+	// // TODO: handle exception
+	// e.printStackTrace();
+	// }
+	// }
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("***************************************************************Program end*****************************************************************************");
 

@@ -94,8 +94,8 @@ public class TweetCollection {
 			    IOUtils.log(Integer.toString(count));
 			    IOUtils.writeFile("log.txt", count.toString(),
 				    false);
-			    IOUtils.writeFile("tweets.txt", text);
-			    IOUtils.writeFile("jsonTweets.txt", jsonTweet);
+			    IOUtils.writeFile("cestweets.txt", text);
+			    IOUtils.writeFile("cesjason.txt", jsonTweet);
 			    count++;
 			} catch (SQLException e) {
 			    // TODO Auto-generated catch block
@@ -152,7 +152,7 @@ public class TweetCollection {
 	// String[] jsonTweet = IOUtils.readFile("jsonTweets.txt");
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.INSERT_QUERY);
+	    pst = con.prepareStatement(TweetDO.INSERT_QUERY_US);
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    IOUtils.log(e.getMessage());
@@ -193,14 +193,15 @@ public class TweetCollection {
 
     private static String[] createTrack() {
 	// TODO Auto-generated method stub
-	String[] track = { "pak", "usa", "cricket", "football", "ebola",
-		"google", "comet", "europe", "hockey", "isis", "NBA", "NFL",
-		"stadium", "terrorist", "university", "mit", "stanford",
-		"concert", "protest", "tv show", "asia", "africa", "movie",
-		"album", "match", "microsoft", "sony", "xbox", "playstation",
-		"ps4", "ps3", "apple", "samsung", "disease", "bbc", "computer",
-		"laptop", "smartphone", "galaxy", "tv", "season", "cod",
-		"game", "pakvsnz" };
+	// String[] track = { "pak", "usa", "cricket", "football", "ebola",
+	// "google", "comet", "europe", "hockey", "isis", "NBA", "NFL",
+	// "stadium", "terrorist", "university", "mit", "stanford",
+	// "concert", "protest", "tv show", "asia", "africa", "movie",
+	// "album", "match", "microsoft", "sony", "xbox", "playstation",
+	// "ps4", "ps3", "apple", "samsung", "disease", "bbc", "computer",
+	// "laptop", "smartphone", "galaxy", "tv", "season", "cod",
+	// "game", "pakvsnz" };
+	String[] track = { "snowmaggeddon2015", "blizzardof2015" };
 	return track;
     }
 

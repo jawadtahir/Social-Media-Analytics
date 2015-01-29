@@ -1,20 +1,13 @@
 package pk.lums.edu.sma.processing;
 
-import static java.nio.file.FileVisitResult.CONTINUE;
-
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import pk.lums.edu.sma.utils.IOUtils;
 
 public class ClusterProcessor {
     private static DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
@@ -133,40 +126,8 @@ public class ClusterProcessor {
 	File relatDir = new File(relationDir);
 	for (String strRelat : relatDir.list()) {
 	    File relate = new File(relationDir, strRelat);
-	    deleteDir(relate);
+	    IOUtils.deleteDir(relate);
 	}
     }
 
-    private static void deleteDir(File file) {
-	Path dir = Paths.get(file.getAbsolutePath());
-	try {
-	    Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-
-		@Override
-		public FileVisitResult visitFile(Path file,
-			BasicFileAttributes attrs) throws IOException {
-
-		    System.out.println("Deleting file: " + file);
-		    Files.delete(file);
-		    return CONTINUE;
-		}
-
-		@Override
-		public FileVisitResult postVisitDirectory(Path dir,
-			IOException exc) throws IOException {
-
-		    System.out.println("Deleting dir: " + dir);
-		    if (exc == null) {
-			Files.delete(dir);
-			return CONTINUE;
-		    } else {
-			throw exc;
-		    }
-		}
-
-	    });
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-    }
 }

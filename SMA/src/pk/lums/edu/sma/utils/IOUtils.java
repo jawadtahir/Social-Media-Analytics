@@ -1,10 +1,18 @@
 package pk.lums.edu.sma.utils;
 
+import static java.nio.file.FileVisitResult.CONTINUE;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,7 +28,7 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class IOUtils {
-    private static final String url = "jdbc:mysql://10.101.72.14:3306/TWEETDATA";
+    private static final String url = "jdbc:mysql://localhost:3306/TWEETDATA";
     private static final String user = "jawad2";
     private static final String password = "abc123";
 
@@ -182,4 +190,38 @@ public class IOUtils {
     public static Connection getConnection() throws SQLException {
 	return DriverManager.getConnection(url, user, password);
     }
+
+    public static void deleteDir(File file) {
+	Path dir = Paths.get(file.getAbsolutePath());
+	try {
+	    Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+
+		@Override
+		public FileVisitResult visitFile(Path file,
+			BasicFileAttributes attrs) throws IOException {
+
+		    System.out.println("Deleting file: " + file);
+		    Files.delete(file);
+		    return CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir,
+			IOException exc) throws IOException {
+
+		    System.out.println("Deleting dir: " + dir);
+		    if (exc == null) {
+			Files.delete(dir);
+			return CONTINUE;
+		    } else {
+			throw exc;
+		    }
+		}
+
+	    });
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+    }
+
 }

@@ -26,7 +26,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 10;
-    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 5;
+    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
     private static DecimalFormat df = new DecimalFormat("#.####");
@@ -93,7 +93,7 @@ public class EntityProcessor {
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Going for main course...");
 	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
-		vecSpaceList, 10);
+		vecSpaceList, 20);
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Printing clusters...");
 	printClusters(cluster);
@@ -267,7 +267,7 @@ public class EntityProcessor {
 	    rand.clear();
 	    // randomly initialize cluster centers
 	    while (rand.size() < k) {
-		int randNo = (int) (Math.random() * vecspace.size());
+		int randNo = (int) ((Math.random() * vecspace.size()) + 1000000);
 		if (vecspace.get(randNo) != null)
 		    rand.add(randNo);
 	    }
@@ -325,9 +325,18 @@ public class EntityProcessor {
 			    updatec[i] += doc[i];
 		    }
 		    for (int i = 0; i < updatec.length; i++) {
-			double temp = Double.parseDouble(df.format(updatec[i]
-				/ clusters.get(cent).size()));
-			updatec[i] = temp;
+			double temp = 0;
+			try {
+			    temp = Double.parseDouble(df.format(updatec[i]
+				    / clusters.get(cent).size()));
+
+			} catch (NumberFormatException ex) {
+			    System.out.println(ex.getMessage());
+			    System.out.println(ex.getCause());
+			} finally {
+			    updatec[i] = temp;
+			}
+
 		    }
 		    step.put(updatec, new TreeSet<Integer>());
 		}
@@ -342,8 +351,8 @@ public class EntityProcessor {
 		if (++iter >= maxiter)
 		    go = false;
 	    }
-	    System.out.println(clusters.toString()
-		    .replaceAll("\\[[\\w@]+=", ""));
+	    // System.out.println(clusters.toString()
+	    // .replaceAll("\\[[\\w@]+=", ""));
 	    if (iter < maxiter)
 		System.out.println("Converged in " + iter + " steps.");
 	    else

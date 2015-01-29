@@ -71,19 +71,22 @@ public class GetEntities extends Thread {
 		    String ne = token.get(NamedEntityTagAnnotation.class);
 		    if (pos.equals("HT")) {
 			String ht = removeHash(word.toLowerCase().trim());
-			try {
-			    if (entities.containsKey(ht)) {
-				entities.put(ht, entities.get(ht) + 1);
-			    } else {
-				entities.put(ht, 1);
+			if (ht.length() > 1) {
+			    try {
+				if (entities.containsKey(ht)) {
+				    entities.put(ht, entities.get(ht) + 1);
+				} else {
+				    entities.put(ht, 1);
+				}
+			    } catch (Exception ex) {
+				IOUtils.log(ex.getMessage());
+				continue;
 			    }
-			} catch (Exception ex) {
-			    IOUtils.log(ex.getMessage());
-			    continue;
 			}
+
 		    }
 		    if (!ne.equals("O")) {
-			if (isEntity(ne)) {
+			if (isEntity(ne) && word.length() > 1) {
 			    try {
 				if (entities.containsKey(word.toLowerCase())) {
 				    entities.put(
