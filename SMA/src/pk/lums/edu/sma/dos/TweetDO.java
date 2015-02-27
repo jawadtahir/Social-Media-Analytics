@@ -13,12 +13,21 @@ public class TweetDO {
     public static final String SELECT_ALL_ID_TEXT_QUERY = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTA WHERE idTWEETDTA > 1000000";
     public static final String SELECT_TEXT_LIKE = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTA where textTweet like ? and idTWEETDTA > 1000000";
     public static final String SELECT_ALL_FROM_ID = "select * from TWEETDATA.TWEETDTA where idTWEETDTA = ? and idTWEETDTA > 1000000";
+    public static final String SELECT_ALL_QUERY = "SELECT * FROM TWEETDATA.TWEETDTA";
 
     public static final String INSERT_QUERY_US = "INSERT INTO TWEETDATA.TWEETDTAUS (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
     public static final String SELECT_ALL_TEXT_QUERY_US = "SELECT textTweet FROM TWEETDATA.TWEETDTAUS";
     public static final String SELECT_ALL_ID_TEXT_QUERY_US = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTAUS";
     public static final String SELECT_TEXT_LIKE_US = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTAUS where textTweet like ?";
     public static final String SELECT_ALL_FROM_ID_US = "select * from TWEETDATA.TWEETDTAUS where idTWEETDTA = ?";
+    public static final String SELECT_ALL_QUERY_US = "SELECT * FROM TWEETDATA.TWEETDTAUS limit 1000";
+
+    public static final String INSERT_QUERY_NEW = "INSERT INTO TWEETDATA.TWEETDTANEW (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
+    public static final String SELECT_ALL_TEXT_QUERY_NEW = "SELECT textTweet FROM TWEETDATA.TWEETDTANEW";
+    public static final String SELECT_ALL_ID_TEXT_QUERY_NEW = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTANEW";
+    public static final String SELECT_TEXT_LIKE_NEW = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTANEW where textTweet like ?";
+    public static final String SELECT_ALL_FROM_ID_NEW = "select * from TWEETDATA.TWEETDTANEW where idTWEETDTA = ?";
+    public static final String SELECT_ALL_QUERYNEW = "SELECT * FROM TWEETDATA.TWEETDTANEW";
 
     private long id = 0;
     private String jsonTweet = "";
@@ -122,7 +131,8 @@ public class TweetDO {
 	ArrayList<String> textList = new ArrayList<String>();
 	try {
 	    while (res.next()) {
-		String text = res.getString(colomnName);
+		String text = res.getString(colomnName).replaceAll(
+			"[^\\u0000-\\uFFFF]", "");
 		textList.add(text);
 	    }
 	} catch (SQLException e) {

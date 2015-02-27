@@ -7,17 +7,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
 
-public class TweetProcessing {
+public class TweetProcessingSigRank {
 
     private final static int NO_OF_THREADS = 4;
     private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
-    private static ArrayList<String> strTwtList = new ArrayList<String>();
+    private static Map<Date, Integer> dateMap = new HashMap<Date, Integer>();
+    private static Map<EntityDateModel, Integer> entityDateMap = new HashMap<EntityDateModel, Integer>();
+    private static ArrayList<TweetDO> twtList = new ArrayList<TweetDO>();
     private static String[] topEntities = null;
 
     public static void main(String[] args) {
@@ -31,12 +35,12 @@ public class TweetProcessing {
 	// Reading tweets
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY_US);
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_QUERY_US);
 	    res = pst.executeQuery();
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Converting Tweets into array....");
 	    // getting tweets from result set
-	    strTwtList = TweetDO.getTextArrayOfColumn(res, "textTweet");
+	    twtList = TweetDO.translateAllTweetDO(res);
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    con.close();
 	} catch (SQLException e1) {
@@ -44,6 +48,8 @@ public class TweetProcessing {
 	}
 	// Creating a synchronized hashed map so that all threads can share data
 	entityMap = Collections.synchronizedMap(entityMap);
+	dateMap = Collections.synchronizedMap(dateMap);
+	entityDateMap = Collections.synchronizedMap(entityDateMap);
 	// Empty out cluster folder
 	IOUtils.clearClusterFolder();
 	// IOUtils.log("Populating tweet array list....");
@@ -53,29 +59,30 @@ public class TweetProcessing {
 	// }
 
 	// This number of tweets will be assigned to each thread
-	int noOfTweetsPerThread = strTwtList.size() / NO_OF_THREADS;
-	ArrayList<NerUsageExample> threadList = new ArrayList<NerUsageExample>();
+	int noOfTweetsPerThread = twtList.size() / NO_OF_THREADS;
+	List<GetEntitiesWithSigRank> threadList = new ArrayList<GetEntitiesWithSigRank>();
 	IOUtils.log("Creating threads....");
 
 	// Creating threads
 	for (int i = 0; i < NO_OF_THREADS; i++) {
-	    String[] tweetsForThread = getNextMelements(
-		    i * noOfTweetsPerThread, noOfTweetsPerThread);
-	    NerUsageExample thread = new NerUsageExample(tweetsForThread,
-		    Integer.toString(i), entityMap);
+	    List<TweetDO> tweetsForThread = getNextMelements(i
+		    * noOfTweetsPerThread, noOfTweetsPerThread);
+	    GetEntitiesWithSigRank thread = new GetEntitiesWithSigRank(
+		    tweetsForThread, Integer.toString(i), entityMap, dateMap,
+		    entityDateMap);
 	    threadList.add(thread);
 	}
 
 	IOUtils.log("Strating threads....");
 
 	// Starting threads...
-	for (NerUsageExample thread : threadList) {
+	for (GetEntitiesWithSigRank thread : threadList) {
 	    thread.start();
 	}
 
 	IOUtils.log("Waiting for threads to close");
 	// Waiting for threads to close....
-	for (NerUsageExample thread : threadList) {
+	for (GetEntitiesWithSigRank thread : threadList) {
 	    try {
 		thread.join();
 	    } catch (InterruptedException e) {
@@ -123,12 +130,12 @@ public class TweetProcessing {
      *            number of elements to get
      * @return string array ranging from [strtIndex : strtIndex + offset
      */
-    private static String[] getNextMelements(int strtIndex, int offset) {
-	ArrayList<String> retList = new ArrayList<String>();
+    private static List<TweetDO> getNextMelements(int strtIndex, int offset) {
+	List<TweetDO> retList = new ArrayList<TweetDO>();
 	for (int i = 0; i < offset; i++) {
-	    String tweet = strTwtList.get(strtIndex + i);
+	    TweetDO tweet = twtList.get(strtIndex + i);
 	    retList.add(tweet);
 	}
-	return retList.toArray(new String[retList.size()]);
+	return retList;
     }
 }

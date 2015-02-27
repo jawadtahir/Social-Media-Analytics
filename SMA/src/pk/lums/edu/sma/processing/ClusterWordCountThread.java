@@ -2,7 +2,10 @@ package pk.lums.edu.sma.processing;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
@@ -46,7 +49,9 @@ public class ClusterWordCountThread extends Thread {
 	}
 	wordCount = IOUtils.sortByValues(wordCount);
 	// IOUtils.writeFile(fileName.getName(), wordCount.toString(), true);
+	wordCount = getTopNEntities(wordCount, 100);
 
+	IOUtils.log(wordCount.toString());
 	ChartCreator cc = new ChartCreator(wordCount, fileName.getName()
 		.substring(0, fileName.getName().length() - 4));
 	cc.create();
@@ -69,6 +74,23 @@ public class ClusterWordCountThread extends Thread {
 	    return null;
 	}
 	return tdo;
+    }
+
+    public static Map<String, Integer> getTopNEntities(
+	    Map<String, Integer> map, int n) {
+	Iterator<Entry<String, Integer>> itr = map.entrySet().iterator();
+	int i = 0;
+	Map<String, Integer> entites = new LinkedHashMap<String, Integer>();
+	while (itr.hasNext()) {
+	    if (i == n) {
+		break;
+	    }
+	    Entry<String, Integer> ent = itr.next();
+	    entites.put(ent.getKey(), ent.getValue());
+	    i++;
+	}
+
+	return entites;
     }
 
 }

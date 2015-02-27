@@ -2,14 +2,14 @@ package pk.lums.edu.sma.processing;
 
 import org.apache.lucene.util.Attribute;
 
-public interface NamedEntityTypeAttribute extends Attribute, Cloneable {
+public interface EventTypeAttribute extends Attribute, Cloneable {
     /**
      * Sets the type of the current token.
      *
      * @param type
      *            type of the current token.
      */
-    void setType(NamedEntityType type);
+    void setType(EventType type);
 
     void setToken(String token);
 
@@ -18,7 +18,7 @@ public interface NamedEntityTypeAttribute extends Attribute, Cloneable {
      *
      * @return type of the current token.
      */
-    NamedEntityType getType();
+    EventType getType();
 
     String getToken();
 

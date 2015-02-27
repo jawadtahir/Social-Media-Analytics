@@ -75,22 +75,27 @@ public class TweetCollection {
 			&& status.getLang().equals("en")
 			&& !status.toString().contains(newLine)) {
 
-		    if (count < 1000000) {
+		    if (count < 100000) {
+			// Creating a tweet data object
 			TweetDO tdo = new TweetDO();
 			tdo.setDateTextTweet(df.format(status.getCreatedAt()));
 			tdo.setJsonTweet(jsonTweet);
-			tdo.setTextTweet(text);
+			// Removing non-UTF8 characters
+			tdo.setTextTweet(status.getText().replaceAll(
+				"[^\\u0000-\\uFFFF]", ""));
 			tdo.setTweetIDTweet(status.getId());
 			if (status.getGeoLocation() != null) {
 			    tdo.setLocTweet(status.getGeoLocation().toString());
 			}
 			try {
+			    // Inserting in db
 			    pst.setString(1, tdo.getJsonTweet());
 			    pst.setString(2, tdo.getTextTweet());
 			    pst.setString(3, tdo.getDateTextTweet());
 			    pst.setString(4, tdo.getLocTweet());
 			    pst.setLong(5, tdo.getTweetIDTweet());
 			    pst.execute();
+			    // logging
 			    IOUtils.log(Integer.toString(count));
 			    IOUtils.writeFile("log.txt", count.toString(),
 				    false);
@@ -98,7 +103,6 @@ public class TweetCollection {
 			    IOUtils.writeFile("cesjason.txt", jsonTweet);
 			    count++;
 			} catch (SQLException e) {
-			    // TODO Auto-generated catch block
 			    IOUtils.log(e.getMessage());
 			}
 		    } else {
@@ -149,20 +153,27 @@ public class TweetCollection {
     }
 
     public static void main(String[] args) {
-	// String[] jsonTweet = IOUtils.readFile("jsonTweets.txt");
+	// getting connection URLs
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.INSERT_QUERY_US);
+	    pst = con.prepareStatement(TweetDO.INSERT_QUERY_NEW);
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    IOUtils.log(e.getMessage());
 	}
+	// adding parameters in filter
 	FilterQuery fq = createFilterQuery();
 	TwitterStream str = new TwitterStreamFactory().getInstance();
 	str.addListener(listener);
 	str.filter(fq);
     }
 
+    /**
+     * This function add all the parameters to add in filter query and returns a
+     * filter query
+     * 
+     * @return FilterQuery
+     */
     private static FilterQuery createFilterQuery() {
 	// TODO Auto-generated method stub
 	FilterQuery fq = new FilterQuery();
@@ -173,8 +184,17 @@ public class TweetCollection {
 	return fq;
     }
 
+    /**
+     * Add LongLat coordinates in array and all public tweets in given rectangle
+     * will be captured
+     * 
+     * @return 2D array of double
+     */
     private static double[][] createLocation() {
 	// TODO Auto-generated method stub
+
+	// These coordinates are for Lahore
+
 	// double [][] locArr = {{74.223633d, 31.452234d},{74.437866d,
 	// 31.613901d}};
 	double[][] locArr = null;
@@ -191,6 +211,12 @@ public class TweetCollection {
 	return 0;
     }
 
+    /**
+     * Add words in filter
+     * 
+     * @return String array of words to track
+     */
+
     private static String[] createTrack() {
 	// TODO Auto-generated method stub
 	// String[] track = { "pak", "usa", "cricket", "football", "ebola",
@@ -201,7 +227,11 @@ public class TweetCollection {
 	// "ps4", "ps3", "apple", "samsung", "disease", "bbc", "computer",
 	// "laptop", "smartphone", "galaxy", "tv", "season", "cod",
 	// "game", "pakvsnz" };
-	String[] track = { "snowmaggeddon2015", "blizzardof2015" };
+	// String[] track = { /* "snowmaggeddon2015", "blizzardof2015", */
+	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
+	// "university" };
+	String[] track = { "cwc", "cwc15", "cwc2015", "moin khan", "gayle",
+		"swine flu", "savwi", "ABdeVilliers", "misbah" };
 	return track;
     }
 
