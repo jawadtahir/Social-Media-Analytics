@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -76,6 +76,8 @@ public class GetEntitiesWithSigRank extends Thread {
 		if (pipeline == null) {
 		    continue;
 		}
+		List<String> tempEntList = new ArrayList<String>();
+		List<Date> tempDateList = new ArrayList<Date>();
 		Date creationDate = status.getCreatedAt();
 		count++;
 		IOUtils.log("Thread " + this.getName() + " : Count : " + count
@@ -89,19 +91,18 @@ public class GetEntitiesWithSigRank extends Thread {
 		List<CoreMap> sentences = document
 			.get(SentencesAnnotation.class);
 		for (CoreMap sentence : sentences) {
-		    Map<String, Integer> tempEntMap = new HashMap<String, Integer>();
-		    Map<Date, Integer> tempDateMap = new HashMap<Date, Integer>();
+
 		    for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
 			String word = token.get(TextAnnotation.class);
 			String pos = token.get(PartOfSpeechAnnotation.class);
 			String ne = token.get(NamedEntityTagAnnotation.class);
-			word = word.toLowerCase();
+			word = word.toLowerCase().trim();
 			if (pos.equals("HT")) {
-			    String ht = removeHash(word.toLowerCase().trim());
+			    String ht = removeHash(word);
 			    if (ht.length() > 1) {
 				try {
-				    if (!tempEntMap.containsKey(ht)) {
-					tempEntMap.put(ht, 1);
+				    if (!tempEntList.contains(ht)) {
+					tempEntList.add(ht);
 				    }
 				} catch (Exception ex) {
 				    IOUtils.log(ex.getMessage());
@@ -113,10 +114,8 @@ public class GetEntitiesWithSigRank extends Thread {
 			if (!ne.equals("O")) {
 			    if (isEntity(ne) && word.length() > 1) {
 				try {
-				    if (!tempEntMap.containsKey(word
-					    .toLowerCase())) {
-					tempEntMap.put(word.toLowerCase()
-						.trim(), 1);
+				    if (!tempEntList.contains(word)) {
+					tempEntList.add(word);
 				    }
 				} catch (Exception ex) {
 				    IOUtils.log(ex.getMessage());
@@ -137,8 +136,8 @@ public class GetEntitiesWithSigRank extends Thread {
 				    try {
 					Date tempDate = df.parse(te
 						.getTemporal().toString());
-					if (!tempDateMap.containsKey(tempDate)) {
-					    tempDateMap.put(tempDate, 1);
+					if (!tempDateList.contains(tempDate)) {
+					    tempDateList.add(tempDate);
 					}
 				    } catch (ParseException e) {
 					// TODO Auto-generated catch block
@@ -148,7 +147,20 @@ public class GetEntitiesWithSigRank extends Thread {
 			    }
 			}
 		    }
+		}
+		insertInEntities(tempEntList);
+		insertInDates(tempDateList);
 
+		for (String ent : tempEntList) {
+		    for (Date dte : tempDateList) {
+			EntityDateModel edm = new EntityDateModel(ent, dte);
+			if (entityDateModel.containsKey(edm)) {
+			    entityDateModel.put(edm,
+				    entityDateModel.get(edm) + 1);
+			} else {
+			    entityDateModel.put(edm, 1);
+			}
+		    }
 		}
 
 	    } catch (TwitterException e) {
@@ -179,6 +191,29 @@ public class GetEntitiesWithSigRank extends Thread {
 	// }
 	// cluster.writeCluster();
 	IOUtils.log("Thread " + this.getName() + " is completed");
+    }
+
+    private void insertInDates(List<Date> tempDateList) {
+	// TODO Auto-generated method stub
+	for (Date dte : tempDateList) {
+	    if (dates.containsKey(dte)) {
+		dates.put(dte, dates.get(dte) + 1);
+	    } else {
+		dates.put(dte, 1);
+	    }
+	}
+    }
+
+    private void insertInEntities(List<String> tempEntList) {
+	// TODO Auto-generated method stub
+	for (String ent : tempEntList) {
+	    if (entities.containsKey(ent)) {
+		entities.put(ent, entities.get(ent) + 1);
+	    } else {
+		entities.put(ent, 1);
+	    }
+	}
+
     }
 
     /**

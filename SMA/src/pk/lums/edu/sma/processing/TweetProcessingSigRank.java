@@ -101,6 +101,12 @@ public class TweetProcessingSigRank {
 	IOUtils.log(entityMap.toString());
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
+
+	for (Map.Entry<EntityDateModel, Integer> ent : entityDateMap.entrySet()) {
+	    double g2 = 0f;
+
+	}
+
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);
 	// ProcessEntities proEnt = new ProcessEntities(topEntities, 1);
