@@ -193,11 +193,17 @@ public class TweetCollection {
     private static double[][] createLocation() {
 	// TODO Auto-generated method stub
 
-	// These coordinates are for Lahore
+	// These coordinates are for Lahore (Lower Left, Upper Right )
 
 	// double [][] locArr = {{74.223633d, 31.452234d},{74.437866d,
 	// 31.613901d}};
-	double[][] locArr = null;
+
+	// Oklohama
+
+	double[][] locArr = { { -97.834536d, 35.332382d },
+		{ -97.161624d, 35.666670d } };
+
+	// double[][] locArr = null;
 	return locArr;
     }
 
@@ -230,8 +236,9 @@ public class TweetCollection {
 	// String[] track = { /* "snowmaggeddon2015", "blizzardof2015", */
 	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
 	// "university" };
-	String[] track = { "cwc", "cwc15", "cwc2015", "moin khan", "gayle",
-		"swine flu", "savwi", "ABdeVilliers", "misbah" };
+	String[] track = { "cwc", "cwc15", "cwc2015", "zimbabwe",
+		"nasir jamshed", "swine flu", "irevsa", "ABdeVilliers",
+		"misbah" };
 	return track;
     }
 
