@@ -109,10 +109,12 @@ public class TweetProcessingSigRank {
 	for (Map.Entry<EntityDateModel, Double> ent : entityDateMap.entrySet()) {
 	    double g2 = 0f;
 	    // x = e, y = d
-	    double oxy = ent.getValue() / twtList.size();
-	    double px = entityMap.get(ent.getKey().getEntity())
-		    / twtList.size();
-	    double py = dateMap.get(ent.getKey().getDate()) / twtList.size();
+	    double oxy = (double) ent.getValue().intValue()
+		    / (double) twtList.size();
+	    double px = (double) entityMap.get(ent.getKey().getEntity())
+		    .intValue() / (double) twtList.size();
+	    double py = (double) dateMap.get(ent.getKey().getDate()).intValue()
+		    / (double) twtList.size();
 	    double exy = px * py;
 	    double lnoxyexy = Math.log(oxy / exy);
 	    g2 += oxy * lnoxyexy;
@@ -125,21 +127,21 @@ public class TweetProcessingSigRank {
 			.equals(ent.getKey().getEntity())
 			&& !tempEnt.getKey().getDate()
 				.equals(ent.getKey().getDate())) {
-		    oxy += tempEnt.getValue();
+		    oxy += (double) tempEnt.getValue().intValue();
 		}
 	    }
-	    oxy = oxy / twtList.size();
+	    oxy = oxy / (double) twtList.size();
 	    for (Map.Entry<Date, Integer> tempEnt : dateMap.entrySet()) {
 		if (!tempEnt.getKey().equals(ent.getKey().getDate())) {
-		    py += tempEnt.getValue();
+		    py += (double) tempEnt.getValue().intValue();
 		}
 	    }
-	    py /= twtList.size();
+	    py /= (double) twtList.size();
 	    exy = px * py;
 	    lnoxyexy = Math.log(oxy / exy);
 	    g2 += oxy * lnoxyexy;
 	    // x = !e, y = !d
-	    oxy = 0;
+	    oxy = 0f;
 	    px = 0f;
 
 	    for (Map.Entry<EntityDateModel, Double> tempEnt : entityDateMap
@@ -147,19 +149,49 @@ public class TweetProcessingSigRank {
 		if (!tempEnt.getKey().getDate().equals(ent.getKey().getDate())
 			&& !tempEnt.getKey().getEntity()
 				.equals(ent.getKey().getEntity())) {
-		    oxy = tempEnt.getValue();
+		    oxy += (double) tempEnt.getValue().intValue();
 		}
 	    }
 
-	    oxy /= twtList.size();
+	    oxy /= (double) twtList.size();
 
 	    for (Map.Entry<String, Integer> tempEnt : entityMap.entrySet()) {
 		if (!tempEnt.getKey().equals(ent.getKey().getEntity())) {
-		    px += tempEnt.getValue();
+		    px += (double) tempEnt.getValue().intValue();
 		}
 	    }
 
-	    px /= twtList.size();
+	    px /= (double) twtList.size();
+	    exy = px * py;
+	    lnoxyexy = Math.log(oxy / exy);
+	    g2 += oxy * lnoxyexy;
+
+	    // x = !e, y = d
+	    oxy = 0f;
+	    py = 0f;
+
+	    for (Map.Entry<EntityDateModel, Double> tempEnt : entityDateMap
+		    .entrySet()) {
+		if (!tempEnt.getKey().getEntity()
+			.equals(ent.getKey().getEntity())
+			&& tempEnt.getKey().getDate()
+				.equals(ent.getKey().getDate())) {
+		    oxy += (double) tempEnt.getValue().intValue();
+		}
+	    }
+	    oxy /= (double) twtList.size();
+
+	    for (Map.Entry<Date, Integer> tempEnt : dateMap.entrySet()) {
+		if (tempEnt.getKey().equals(ent.getKey().getDate())) {
+		    py += (double) tempEnt.getValue().intValue();
+		}
+	    }
+	    py /= (double) twtList.size();
+	    exy = px * py;
+	    lnoxyexy = Math.log(oxy / exy);
+	    g2 += oxy * lnoxyexy;
+
+	    ent.setValue(g2);
 
 	}
 

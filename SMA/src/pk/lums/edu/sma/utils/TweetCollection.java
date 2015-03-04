@@ -237,8 +237,9 @@ public class TweetCollection {
 	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
 	// "university" };
 	String[] track = { "cwc", "cwc15", "cwc2015", "zimbabwe",
-		"nasir jamshed", "swine flu", "irevsa", "ABdeVilliers",
-		"misbah" };
+		"nasir jamshed", "swine flu", "pakvuae", "ahmad shehzad",
+		"sohail khan", "maxwell", "glenn maxwell", "ausvafg", "misbah",
+		"imran khan", "mwc15", "wahab riaz", "unicef", "polio" };
 	return track;
     }
 
