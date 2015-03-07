@@ -16,7 +16,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class TweetProcessing {
 
     private final static int NO_OF_THREADS = 4;
-    private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
+    private static Map<String, Double> entityMap = new HashMap<String, Double>();
     private static ArrayList<String> strTwtList = new ArrayList<String>();
     private static String[] topEntities = null;
 

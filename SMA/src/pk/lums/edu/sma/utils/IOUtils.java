@@ -93,7 +93,7 @@ public class IOUtils {
      *            HashMap to sort
      * @return Sorted HashMap
      */
-    public static <K extends Comparable<String>, V extends Comparable<Integer>> Map<K, V> sortByValues(
+    public static <K extends Comparable<String>, V extends Comparable<Double>> Map<K, V> sortByValues(
 	    Map<K, V> map) {
 	try {
 
@@ -107,7 +107,7 @@ public class IOUtils {
 
 	    @Override
 	    public int compare(Entry<K, V> o1, Entry<K, V> o2) {
-		return o2.getValue().compareTo((Integer) o1.getValue());
+		return o2.getValue().compareTo((Double) o1.getValue());
 	    }
 	});
 
@@ -132,7 +132,7 @@ public class IOUtils {
      * @return top n number of entries from map, in map format
      */
 
-    public static String[] getTopNEntities(Map<String, Integer> map, int n) {
+    public static String[] getTopNEntities(Map<String, Double> map, int n) {
 	Iterator<String> itr = map.keySet().iterator();
 	int i = 0;
 	ArrayList<String> entites = new ArrayList<String>();

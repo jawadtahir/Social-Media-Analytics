@@ -13,10 +13,10 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class ClusterWordCountThread extends Thread {
     private Thread t;
     private File fileName;
-    private Map<String, Integer> entMap;
+    private Map<String, Double> entMap;
 
     public ClusterWordCountThread(int threadCount, File fileName,
-	    Map<String, Integer> map) {
+	    Map<String, Double> map) {
 	this.fileName = fileName;
 	this.entMap = map;
 	this.t = new Thread(this, Integer.toString(threadCount));
@@ -28,8 +28,8 @@ public class ClusterWordCountThread extends Thread {
 
     private void process() {
 	// TODO Auto-generated method stub
-	Map<String, Integer> wordCount = null;
-	wordCount = new HashMap<String, Integer>();
+	Map<String, Double> wordCount = null;
+	wordCount = new HashMap<String, Double>();
 	String[] tweetEnts = IOUtils.readFile(this.fileName.getAbsolutePath());
 	for (String tweetEnt : tweetEnts) {
 	    TweetDO tdo = stringToDO(tweetEnt);
@@ -41,7 +41,7 @@ public class ClusterWordCountThread extends Thread {
 			if (wordCount.containsKey(string)) {
 			    wordCount.put(string, wordCount.get(string) + 1);
 			} else {
-			    wordCount.put(string, 1);
+			    wordCount.put(string, (double) 1);
 			}
 		    }
 		}
@@ -76,16 +76,16 @@ public class ClusterWordCountThread extends Thread {
 	return tdo;
     }
 
-    public static Map<String, Integer> getTopNEntities(
-	    Map<String, Integer> map, int n) {
-	Iterator<Entry<String, Integer>> itr = map.entrySet().iterator();
+    public static Map<String, Double> getTopNEntities(Map<String, Double> map,
+	    int n) {
+	Iterator<Entry<String, Double>> itr = map.entrySet().iterator();
 	int i = 0;
-	Map<String, Integer> entites = new LinkedHashMap<String, Integer>();
+	Map<String, Double> entites = new LinkedHashMap<String, Double>();
 	while (itr.hasNext()) {
 	    if (i == n) {
 		break;
 	    }
-	    Entry<String, Integer> ent = itr.next();
+	    Entry<String, Double> ent = itr.next();
 	    entites.put(ent.getKey(), ent.getValue());
 	    i++;
 	}

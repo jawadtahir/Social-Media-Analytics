@@ -18,7 +18,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class TweetProcessingSigRank {
 
     private final static int NO_OF_THREADS = 4;
-    private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
+    private static Map<String, Double> entityMap = new HashMap<String, Double>();
     private static Map<Date, Integer> dateMap = new HashMap<Date, Integer>();
     private static Map<EntityDateModel, Double> entityDateMap = new HashMap<EntityDateModel, Double>();
     private static ArrayList<TweetDO> twtList = new ArrayList<TweetDO>();
@@ -35,7 +35,7 @@ public class TweetProcessingSigRank {
 	// Reading tweets
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_QUERY_US);
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_QUERY);
 	    res = pst.executeQuery();
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Converting Tweets into array....");
@@ -155,7 +155,7 @@ public class TweetProcessingSigRank {
 
 	    oxy /= (double) twtList.size();
 
-	    for (Map.Entry<String, Integer> tempEnt : entityMap.entrySet()) {
+	    for (Map.Entry<String, Double> tempEnt : entityMap.entrySet()) {
 		if (!tempEnt.getKey().equals(ent.getKey().getEntity())) {
 		    px += (double) tempEnt.getValue().intValue();
 		}

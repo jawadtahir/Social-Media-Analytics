@@ -35,12 +35,12 @@ public class GetEntitiesWithSigRank extends Thread {
 
     private Thread t;
     private List<TweetDO> tweets;
-    private Map<String, Integer> entities;
+    private Map<String, Double> entities;
     private Map<Date, Integer> dates;
     private Map<EntityDateModel, Double> entityDateModel;
 
     public GetEntitiesWithSigRank(List<TweetDO> tweet, String tNumber,
-	    Map<String, Integer> entityMap, Map<Date, Integer> dateMap,
+	    Map<String, Double> entityMap, Map<Date, Integer> dateMap,
 	    Map<EntityDateModel, Double> edMap) {
 	this.tweets = tweet;
 	this.entities = entityMap;
@@ -210,7 +210,7 @@ public class GetEntitiesWithSigRank extends Thread {
 	    if (entities.containsKey(ent)) {
 		entities.put(ent, entities.get(ent) + 1);
 	    } else {
-		entities.put(ent, 1);
+		entities.put(ent, (double) 1);
 	    }
 	}
 

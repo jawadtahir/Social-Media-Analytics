@@ -14,10 +14,10 @@ public class NerUsageExample extends Thread {
 
     private Thread t;
     private String[] tweets;
-    private Map<String, Integer> entities;
+    private Map<String, Double> entities;
 
     public NerUsageExample(String[] tweets, String tNumber,
-	    Map<String, Integer> entities) {
+	    Map<String, Double> entities) {
 	// TODO Constructor
 	this.tweets = tweets;
 	this.entities = entities;
@@ -113,7 +113,7 @@ public class NerUsageExample extends Thread {
 	if (entities.containsKey(token)) {
 	    entities.put(token, (entities.get(token) + 1));
 	} else {
-	    entities.put(token, 1);
+	    entities.put(token, (double) 1);
 	}
     }
 

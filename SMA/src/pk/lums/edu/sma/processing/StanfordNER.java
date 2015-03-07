@@ -67,7 +67,7 @@ public class StanfordNER {
 	Properties props = new Properties();
 	// props.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse");
 	InputStream inStream = null;
-	HashMap<String, Integer> entities = new HashMap<String, Integer>();
+	HashMap<String, Double> entities = new HashMap<String, Double>();
 	int count = 0;
 
 	try {
@@ -137,7 +137,7 @@ public class StanfordNER {
 				if (entities.containsKey(ht)) {
 				    entities.put(ht, entities.get(ht) + 1);
 				} else {
-				    entities.put(ht, 1);
+				    entities.put(ht, (double) 1);
 				}
 			    } catch (Exception ex) {
 				IOUtils.log(ex.getMessage());
@@ -159,7 +159,8 @@ public class StanfordNER {
 						word.toLowerCase(),
 						entities.get(word.toLowerCase()) + 1);
 				    } else {
-					entities.put(word.toLowerCase(), 1);
+					entities.put(word.toLowerCase(),
+						(double) 1);
 				    }
 				} catch (Exception ex) {
 				    IOUtils.log(ex.getMessage());
@@ -227,7 +228,7 @@ public class StanfordNER {
 	IOUtils.log("*********************************************************************************");
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	// System.out.println(Calendar.getInstance().getTime());
-	HashMap<String, Integer> sortedEntities = (HashMap<String, Integer>) pk.lums.edu.sma.utils.IOUtils
+	HashMap<String, Double> sortedEntities = (HashMap<String, Double>) pk.lums.edu.sma.utils.IOUtils
 		.sortByValues(entities);
 	// System.out.println (sortedEntities.toString ());
 	IOUtils.log(sortedEntities.toString());

@@ -23,7 +23,7 @@ public class ClusterWordCount {
 	String csvEntities = entityLine[0].substring(1);
 	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
 	String[] entityArr = csvEntities.split(",");
-	Map<String, Integer> entityMap = new HashMap<String, Integer>();
+	Map<String, Double> entityMap = new HashMap<String, Double>();
 	for (String entity : entityArr) {
 	    if (entity.length() > 3) {
 		// System.out.println(entity);
@@ -31,7 +31,7 @@ public class ClusterWordCount {
 		if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
 		    String key = keyVal[0].trim();
 		    int val = Integer.parseInt(keyVal[1]);
-		    entityMap.put(key, val);
+		    entityMap.put(key, (double) val);
 		}
 	    }
 	}
@@ -60,16 +60,16 @@ public class ClusterWordCount {
 
     }
 
-    public static Map<String, Integer> getTopNEntities(
-	    Map<String, Integer> map, int n) {
-	Iterator<Entry<String, Integer>> itr = map.entrySet().iterator();
+    public static Map<String, Double> getTopNEntities(Map<String, Double> map,
+	    int n) {
+	Iterator<Entry<String, Double>> itr = map.entrySet().iterator();
 	int i = 0;
-	Map<String, Integer> entites = new HashMap<String, Integer>();
+	Map<String, Double> entites = new HashMap<String, Double>();
 	while (itr.hasNext()) {
 	    if (i == n) {
 		break;
 	    }
-	    Entry<String, Integer> ent = itr.next();
+	    Entry<String, Double> ent = itr.next();
 	    entites.put(ent.getKey(), ent.getValue());
 	    i++;
 	}

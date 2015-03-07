@@ -17,10 +17,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 public class ChartCreator {
-    private Map<String, Integer> wordCount;
+    private Map<String, Double> wordCount;
     private String chartName;
 
-    public ChartCreator(Map<String, Integer> wordCount, String chartName) {
+    public ChartCreator(Map<String, Double> wordCount, String chartName) {
 	this.wordCount = wordCount;
 	this.chartName = chartName;
     }
@@ -44,12 +44,12 @@ public class ChartCreator {
 	}
     }
 
-    private DefaultCategoryDataset createDataSet(Map<String, Integer> wordCount) {
+    private DefaultCategoryDataset createDataSet(Map<String, Double> wordCount) {
 	// TODO Auto-generated method stub
 	DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
-	Iterator<Entry<String, Integer>> itr = wordCount.entrySet().iterator();
+	Iterator<Entry<String, Double>> itr = wordCount.entrySet().iterator();
 	while (itr.hasNext()) {
-	    Entry<String, Integer> ent = itr.next();
+	    Entry<String, Double> ent = itr.next();
 	    dataSet.setValue(ent.getValue(), "Occurence", ent.getKey());
 	}
 	return dataSet;
