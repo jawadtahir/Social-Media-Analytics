@@ -194,6 +194,9 @@ public class TweetProcessingSigRank {
 	    ent.setValue(g2);
 
 	}
+	entityDateMap = IOUtils.sortByValues(entityDateMap);
+	String text = entityDateMap.toString();
+	IOUtils.writeFile("Events.txt", entityDateMap.toString(), false);
 
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);

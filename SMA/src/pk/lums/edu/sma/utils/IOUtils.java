@@ -93,7 +93,7 @@ public class IOUtils {
      *            HashMap to sort
      * @return Sorted HashMap
      */
-    public static <K extends Comparable<String>, V extends Comparable<Double>> Map<K, V> sortByValues(
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValues(
 	    Map<K, V> map) {
 	try {
 
@@ -107,7 +107,7 @@ public class IOUtils {
 
 	    @Override
 	    public int compare(Entry<K, V> o1, Entry<K, V> o2) {
-		return o2.getValue().compareTo((Double) o1.getValue());
+		return o2.getValue().compareTo(o1.getValue());
 	    }
 	});
 

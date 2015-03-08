@@ -1,11 +1,14 @@
 package pk.lums.edu.sma.processing;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class EntityDateModel {
 
     private String entity = "";
     private Date date = null;
+    private DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     public EntityDateModel(String entity, Date date) {
 	super();
@@ -44,5 +47,14 @@ public class EntityDateModel {
     @Override
     public int hashCode() {
 	return (this.entity + this.date.toString()).hashCode();
+    }
+
+    @Override
+    public String toString() {
+	StringBuilder sb = new StringBuilder();
+	sb.append("{ Entity: " + this.entity + ", Date: " + date.toString()
+		+ " }");
+
+	return sb.toString();
     }
 }
