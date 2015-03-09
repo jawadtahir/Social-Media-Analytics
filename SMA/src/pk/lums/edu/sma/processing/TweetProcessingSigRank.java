@@ -17,10 +17,10 @@ import pk.lums.edu.sma.utils.IOUtils;
 
 public class TweetProcessingSigRank {
 
-    private final static int NO_OF_THREADS = 4;
+    private final static int NO_OF_THREADS = 8;
     private static Map<String, Double> entityMap = new HashMap<String, Double>();
     private static Map<Date, Integer> dateMap = new HashMap<Date, Integer>();
-    private static Map<EntityDateModel, Double> entityDateMap = new HashMap<EntityDateModel, Double>();
+    private static Map<EntityPhraseDateModel, Double> entityDateMap = new HashMap<EntityPhraseDateModel, Double>();
     private static ArrayList<TweetDO> twtList = new ArrayList<TweetDO>();
     private static String[] topEntities = null;
 
@@ -35,7 +35,7 @@ public class TweetProcessingSigRank {
 	// Reading tweets
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_QUERY);
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_QUERY_US);
 	    res = pst.executeQuery();
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Converting Tweets into array....");
@@ -60,14 +60,14 @@ public class TweetProcessingSigRank {
 
 	// This number of tweets will be assigned to each thread
 	int noOfTweetsPerThread = twtList.size() / NO_OF_THREADS;
-	List<GetEntitiesWithSigRank> threadList = new ArrayList<GetEntitiesWithSigRank>();
+	List<NerUsageExampleWithSigRank> threadList = new ArrayList<NerUsageExampleWithSigRank>();
 	IOUtils.log("Creating threads....");
 
 	// Creating threads
 	for (int i = 0; i < NO_OF_THREADS; i++) {
 	    List<TweetDO> tweetsForThread = getNextMelements(i
 		    * noOfTweetsPerThread, noOfTweetsPerThread);
-	    GetEntitiesWithSigRank thread = new GetEntitiesWithSigRank(
+	    NerUsageExampleWithSigRank thread = new NerUsageExampleWithSigRank(
 		    tweetsForThread, Integer.toString(i), entityMap, dateMap,
 		    entityDateMap);
 	    threadList.add(thread);
@@ -76,13 +76,13 @@ public class TweetProcessingSigRank {
 	IOUtils.log("Strating threads....");
 
 	// Starting threads...
-	for (GetEntitiesWithSigRank thread : threadList) {
+	for (NerUsageExampleWithSigRank thread : threadList) {
 	    thread.start();
 	}
 
 	IOUtils.log("Waiting for threads to close");
 	// Waiting for threads to close....
-	for (GetEntitiesWithSigRank thread : threadList) {
+	for (NerUsageExampleWithSigRank thread : threadList) {
 	    try {
 		thread.join();
 	    } catch (InterruptedException e) {
@@ -103,10 +103,11 @@ public class TweetProcessingSigRank {
 	IOUtils.log("Going to process entities....");
 
 	// temporary copy entityDateMap
-	Map<EntityDateModel, Double> tempMap = new HashMap<EntityDateModel, Double>(
+	Map<EntityPhraseDateModel, Double> tempMap = new HashMap<EntityPhraseDateModel, Double>(
 		entityDateMap);
 
-	for (Map.Entry<EntityDateModel, Double> ent : entityDateMap.entrySet()) {
+	for (Map.Entry<EntityPhraseDateModel, Double> ent : entityDateMap
+		.entrySet()) {
 	    double g2 = 0f;
 	    // x = e, y = d
 	    double oxy = (double) ent.getValue().intValue()
@@ -121,7 +122,7 @@ public class TweetProcessingSigRank {
 	    // x = e, y = !d
 	    oxy = 0f;
 	    py = 0f;
-	    for (Map.Entry<EntityDateModel, Double> tempEnt : tempMap
+	    for (Map.Entry<EntityPhraseDateModel, Double> tempEnt : tempMap
 		    .entrySet()) {
 		if (tempEnt.getKey().getEntity()
 			.equals(ent.getKey().getEntity())
@@ -144,7 +145,7 @@ public class TweetProcessingSigRank {
 	    oxy = 0f;
 	    px = 0f;
 
-	    for (Map.Entry<EntityDateModel, Double> tempEnt : entityDateMap
+	    for (Map.Entry<EntityPhraseDateModel, Double> tempEnt : entityDateMap
 		    .entrySet()) {
 		if (!tempEnt.getKey().getDate().equals(ent.getKey().getDate())
 			&& !tempEnt.getKey().getEntity()
@@ -170,7 +171,7 @@ public class TweetProcessingSigRank {
 	    oxy = 0f;
 	    py = 0f;
 
-	    for (Map.Entry<EntityDateModel, Double> tempEnt : entityDateMap
+	    for (Map.Entry<EntityPhraseDateModel, Double> tempEnt : entityDateMap
 		    .entrySet()) {
 		if (!tempEnt.getKey().getEntity()
 			.equals(ent.getKey().getEntity())

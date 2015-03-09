@@ -200,10 +200,10 @@ public class TweetCollection {
 
 	// Oklohama
 
-	double[][] locArr = { { -97.834536d, 35.332382d },
-		{ -97.161624d, 35.666670d } };
+	// double[][] locArr = { { -97.834536d, 35.332382d },
+	// { -97.161624d, 35.666670d } };
 
-	// double[][] locArr = null;
+	double[][] locArr = null;
 	return locArr;
     }
 
@@ -237,9 +237,9 @@ public class TweetCollection {
 	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
 	// "university" };
 	String[] track = { "cwc", "cwc15", "cwc2015", "zimbabwe",
-		"nasir jamshed", "swine flu", "pakvuae", "ahmad shehzad",
-		"sohail khan", "maxwell", "glenn maxwell", "ausvafg", "misbah",
-		"imran khan", "mwc15", "wahab riaz", "unicef", "polio" };
+		"nasir jamshed", "swine flu", "ausvsl", "maxwell", "steyn",
+		"sangakkara", "maxwell", "nzlvafg", "misbah", "imran khan",
+		"mwc15", "wahab riaz", "unicef", "polio" };
 	return track;
     }
 

@@ -20,7 +20,7 @@ public class TweetDO {
     public static final String SELECT_ALL_ID_TEXT_QUERY_US = "SELECT idTWEETDTA, textTweet FROM TWEETDATA.TWEETDTAUS limit 1000";
     public static final String SELECT_TEXT_LIKE_US = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTAUS where textTweet like ? limit 1000";
     public static final String SELECT_ALL_FROM_ID_US = "select * from TWEETDATA.TWEETDTAUS where idTWEETDTA = ? limit 1000";
-    public static final String SELECT_ALL_QUERY_US = "SELECT * FROM TWEETDATA.TWEETDTAUS limit 1000";
+    public static final String SELECT_ALL_QUERY_US = "SELECT * FROM TWEETDATA.TWEETDTAUS limit 100000";
 
     public static final String INSERT_QUERY_NEW = "INSERT INTO TWEETDATA.TWEETDTANEW (jsonTweet, textTweet, dateTextTweet, locationTweet, tweetIDTweet) VALUES (?, ?, ?, ?, ?)";
     public static final String SELECT_ALL_TEXT_QUERY_NEW = "SELECT textTweet FROM TWEETDATA.TWEETDTANEW";
