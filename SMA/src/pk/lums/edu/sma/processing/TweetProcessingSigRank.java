@@ -17,7 +17,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 
 public class TweetProcessingSigRank {
 
-    private final static int NO_OF_THREADS = 8;
+    private final static int NO_OF_THREADS = 4;
     private static Map<String, Double> entityMap = new HashMap<String, Double>();
     private static Map<Date, Integer> dateMap = new HashMap<Date, Integer>();
     private static Map<EntityPhraseDateModel, Double> entityDateMap = new HashMap<EntityPhraseDateModel, Double>();

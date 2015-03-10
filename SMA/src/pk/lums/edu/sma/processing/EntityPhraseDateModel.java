@@ -1,28 +1,24 @@
 package pk.lums.edu.sma.processing;
 
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityPhraseDateModel {
 
     private String entity = "";
     private Date date = null;
-    private Map<String, Double> phrases = new HashMap<String, Double>();
+    private Map<String, Double> phrases = new LinkedHashMap<String, Double>();
 
-    public EntityPhraseDateModel(String entity, List<String> listphrases,
+    public EntityPhraseDateModel(String entity, Map<String, Double> mapphrases,
 	    Date date) {
 	super();
 	this.entity = entity;
 	this.date = date;
-	for (String phrase : listphrases) {
-	    if (phrases.containsKey(phrase)) {
-		phrases.put(phrase, phrases.get(phrase) + 1);
-	    } else {
-		phrases.put(phrase, (double) 1);
-	    }
-	}
+	this.phrases = mapphrases;
     }
 
     public String getEntity() {
@@ -45,13 +41,26 @@ public class EntityPhraseDateModel {
 	return phrases;
     }
 
-    public void addPhrases(Map<String, Double> phrases) {
-	for (Map.Entry<String, Double> ent : phrases.entrySet()) {
-	    if (this.phrases.containsKey(ent.getKey())) {
-		this.phrases.put(ent.getKey(), this.phrases.get(ent.getKey())
-			+ ent.getValue());
+    public void setPhrases(Map<String, Double> phrases) {
+	this.phrases = phrases;
+    }
+
+    public void sortAndRemove() {
+	Map<String, Double> newPhrase = null;
+	for (Map.Entry<String, Double> ent : IOUtils.sortByValues(this.phrases)
+		.entrySet()) {
+	    newPhrase.put(ent.getKey(), ent.getValue());
+	    break;
+	}
+	this.phrases = newPhrase;
+    }
+
+    public void addPhrases(List<String> phrases) {
+	for (String phrase : phrases) {
+	    if (this.phrases.containsKey(phrase)) {
+		this.phrases.put(phrase, this.phrases.get(phrase) + 1);
 	    } else {
-		this.phrases.put(ent.getKey(), ent.getValue());
+		this.phrases.put(phrase, (double) 1);
 	    }
 	}
     }
@@ -78,7 +87,7 @@ public class EntityPhraseDateModel {
     @Override
     public String toString() {
 	StringBuilder sb = new StringBuilder();
-	sb.append("{ Entity: " + this.entity + " Event: " + phrases.toString()
+	sb.append("{ Entity: " + this.entity + ", Event: " + phrases.toString()
 		+ ", Date: " + date.toString() + " }");
 
 	return sb.toString();
