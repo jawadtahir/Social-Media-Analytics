@@ -46,7 +46,7 @@ public class EntityPhraseDateModel {
     }
 
     public void sortAndRemove() {
-	Map<String, Double> newPhrase = null;
+	Map<String, Double> newPhrase = new LinkedHashMap<String, Double>();
 	for (Map.Entry<String, Double> ent : IOUtils.sortByValues(this.phrases)
 		.entrySet()) {
 	    newPhrase.put(ent.getKey(), ent.getValue());

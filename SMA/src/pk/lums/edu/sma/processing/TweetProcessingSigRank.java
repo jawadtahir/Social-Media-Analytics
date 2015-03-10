@@ -97,8 +97,12 @@ public class TweetProcessingSigRank {
 	IOUtils.log("Writing Entities on file.... Here are they");
 	// Writing entities on file so in case of any mishap we can start
 	// over.....
-	IOUtils.writeFile("Entities.txt", entityMap.toString(), false);
+	// IOUtils.writeFile("Entities.txt", entityMap.toString(), false);
 	IOUtils.log(entityMap.toString());
+	entityDateMap = IOUtils.sortByValues(entityDateMap);
+	for (EntityPhraseDateModel epdm : entityDateMap.keySet()) {
+	    epdm.sortAndRemove();
+	}
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
 
