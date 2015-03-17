@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +102,7 @@ public class TweetProcessingSigRank {
 	IOUtils.log(entityMap.toString());
 	entityDateMap = IOUtils.sortByValues(entityDateMap);
 	for (EntityPhraseDateModel epdm : entityDateMap.keySet()) {
-	    epdm.sortAndRemove();
+	    epdm.sortAndRemove(2);
 	}
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
@@ -200,8 +201,20 @@ public class TweetProcessingSigRank {
 
 	}
 	entityDateMap = IOUtils.sortByValues(entityDateMap);
-	String text = entityDateMap.toString();
+	// String text = entityDateMap.toString();
 	IOUtils.writeFile("Events.txt", entityDateMap.toString(), false);
+	String[] topEventPhrases = getTopNEntities(entityDateMap, 20);
+	String[] entsss = IOUtils.getTopNEntities(entityMap,
+		entityMap.size() / 10);
+	List<String> strList = new ArrayList<String>();
+	for (String str : entsss) {
+	    strList.add(str);
+	}
+	for (String eventP : topEventPhrases) {
+	    strList.add(eventP);
+	}
+	EntityProcessorSigRank
+		.main(strList.toArray(new String[strList.size()]));
 
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);
@@ -222,6 +235,15 @@ public class TweetProcessingSigRank {
 
     }
 
+    private static String[] mapToStringArr() {
+	// TODO Auto-generated method stub
+	List<String> ents = new ArrayList<String>();
+	for (Map.Entry<String, Double> ent : entityMap.entrySet()) {
+	    ents.add(ent.getKey());
+	}
+	return ents.toArray(new String[ents.size()]);
+    }
+
     /**
      * This function get the next offset element from strTwtList starting from
      * an index
@@ -239,5 +261,27 @@ public class TweetProcessingSigRank {
 	    retList.add(tweet);
 	}
 	return retList;
+    }
+
+    public static String[] getTopNEntities(
+	    Map<EntityPhraseDateModel, Double> map, int n) {
+	Iterator<EntityPhraseDateModel> itr = map.keySet().iterator();
+	int i = 0;
+	ArrayList<String> entites = new ArrayList<String>();
+	while (itr.hasNext()) {
+	    if (i == n) {
+		break;
+	    }
+	    String[] eNmae = IOUtils
+		    .getTopNEntities(itr.next().getPhrases(), 5);
+	    StringBuilder sb = new StringBuilder();
+	    for (String str : eNmae) {
+		sb.append(str + "><");
+	    }
+	    entites.add(sb.toString());
+	    i++;
+	}
+
+	return entites.toArray(new String[entites.size()]);
     }
 }

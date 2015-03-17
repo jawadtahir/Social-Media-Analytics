@@ -55,6 +55,21 @@ public class EntityPhraseDateModel {
 	this.phrases = newPhrase;
     }
 
+    public void sortAndRemove(int count) {
+	Map<String, Double> newPhrase = new LinkedHashMap<String, Double>();
+	int i = 0;
+	for (Map.Entry<String, Double> ent : IOUtils.sortByValues(this.phrases)
+		.entrySet()) {
+	    i++;
+	    if (i <= count) {
+		newPhrase.put(ent.getKey(), ent.getValue());
+	    } else {
+		break;
+	    }
+	}
+	this.phrases = newPhrase;
+    }
+
     public void addPhrases(List<String> phrases) {
 	for (String phrase : phrases) {
 	    if (this.phrases.containsKey(phrase)) {
