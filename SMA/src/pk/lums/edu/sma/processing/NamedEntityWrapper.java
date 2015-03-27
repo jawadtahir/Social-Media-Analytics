@@ -35,6 +35,7 @@ public class NamedEntityWrapper {
 	    this.stdErr = new BufferedReader(new InputStreamReader(
 		    p.getErrorStream()));
 	} catch (IOException e) {
+	    p.destroy();
 	    e.printStackTrace();
 	    System.exit(-1);
 	}
@@ -55,5 +56,9 @@ public class NamedEntityWrapper {
 	    System.exit(-1);
 	}
 	return "";
+    }
+
+    public void closeProcess() {
+	this.p.destroy();
     }
 }

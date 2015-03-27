@@ -218,6 +218,8 @@ public class NerUsageExampleWithSigRank extends Thread {
 
 	}
 	IOUtils.log("Thread " + this.getName() + " is completed");
+	stream.closeStream();
+
     }
 
     private void insertInEntityMap(String token) {

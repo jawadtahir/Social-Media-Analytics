@@ -31,6 +31,7 @@ public class ClusterProcessor {
 	System.out.println(clusterDir.listFiles().length);
 	int count = 0;
 	for (File cluster : clusterDir.listFiles()) {
+	    fileList.add(cluster);
 	    if (cluster.getName().length() > 8
 		    && !cluster.getName().contains("-")) {
 
@@ -39,7 +40,7 @@ public class ClusterProcessor {
 		// String clusterName = cluster.getName().substring(0,
 		// cluster.getName().length() - 4);
 		// int countTweet = 0;
-		fileList.add(cluster);
+		// fileList.add(cluster);
 		// for (String tweetEnt : tweets) {
 		// StringBuilder sb = new StringBuilder(tweetEnt);
 		// sb.append("  ");

@@ -26,8 +26,9 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class EntityProcessorSigRank {
 
     private static final int NO_OF_THREADS = 10;
-    private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
-    private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
+    // private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
+    // private static ArrayList<ProcessEntities> threadList = new
+    // ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
     private static DecimalFormat df = new DecimalFormat("#.####");
 
@@ -54,9 +55,21 @@ public class EntityProcessorSigRank {
 	// entityMap = IOUtils.sortByValues(entityMap);
 	// String[] topEntities = IOUtils.getTopNEntities(entityMap,
 	// entityMap.size() / FRACTION_OF_TWEETS_TO_PROCESS);
-	String[] topEntities = args;
-	for (String entity : topEntities) {
-	    topEntList.add(entity.trim());
+	String[] topEntities = { "" };
+	if (args.length > 2) {
+	    topEntities = args;
+	    for (String entity : topEntities) {
+		topEntList.add(entity.trim());
+	    }
+	} else {
+	    String entss = IOUtils.readFile("Entities.txt")[0];
+	    entss = entss.substring(1, entss.length() - 1);
+	    for (String temp : entss.split(",")) {
+		if (temp.length() > 2) {
+		    topEntList.add(temp);
+		}
+	    }
+
 	}
 
 	IOUtils.log(Calendar.getInstance().getTime().toString());
@@ -205,15 +218,15 @@ public class EntityProcessorSigRank {
 	return retList;
     }
 
-    private static List<TweetDO> getNextMelements(int strtIndex, int offset,
-	    List<TweetDO> tweets) {
-	List<TweetDO> retList = new ArrayList<TweetDO>();
-	for (int i = strtIndex; i < (strtIndex + offset); i++) {
-	    TweetDO tdo = tweets.get(i);
-	    retList.add(tdo);
-	}
-	return retList;
-    }
+    // private static List<TweetDO> getNextMelements(int strtIndex, int offset,
+    // List<TweetDO> tweets) {
+    // List<TweetDO> retList = new ArrayList<TweetDO>();
+    // for (int i = strtIndex; i < (strtIndex + offset); i++) {
+    // TweetDO tdo = tweets.get(i);
+    // retList.add(tdo);
+    // }
+    // return retList;
+    // }
 
     private static double[] getVecSpace(String tweet) {
 	double[] vecSpace = new double[topEntList.size()];
@@ -270,7 +283,7 @@ public class EntityProcessorSigRank {
 	    rand.clear();
 	    // randomly initialize cluster centers
 	    while (rand.size() < k) {
-		int randNo = (int) ((Math.random() * vecspace.size()) + 1000000);
+		int randNo = (int) ((Math.random() * vecspace.size()));
 		if (vecspace.get(randNo) != null)
 		    rand.add(randNo);
 	    }

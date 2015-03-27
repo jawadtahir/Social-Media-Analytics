@@ -93,4 +93,8 @@ public class NerTokenStream extends TokenStream {
 	}
 	this.currIndex = 0;
     }
+
+    public void closeStream() {
+	this.tagger.closeProcess();
+    }
 }
