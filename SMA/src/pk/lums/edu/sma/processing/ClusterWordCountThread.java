@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,12 +14,12 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class ClusterWordCountThread extends Thread {
     private Thread t;
     private File fileName;
-    private Map<String, Double> entMap;
+    private List<String> entList;
 
     public ClusterWordCountThread(int threadCount, File fileName,
-	    Map<String, Double> map) {
+	    List<String> map) {
 	this.fileName = fileName;
-	this.entMap = map;
+	this.entList = map;
 	this.t = new Thread(this, Integer.toString(threadCount));
     }
 
@@ -37,7 +38,7 @@ public class ClusterWordCountThread extends Thread {
 		String[] subStrs = tdo.getTextTweet().split(" ");
 		for (String string : subStrs) {
 		    string = string.toLowerCase().trim();
-		    if (entMap.containsKey(string.toLowerCase().trim())) {
+		    if (entList.contains(string.toLowerCase().trim())) {
 			if (wordCount.containsKey(string)) {
 			    wordCount.put(string, wordCount.get(string) + 1);
 			} else {

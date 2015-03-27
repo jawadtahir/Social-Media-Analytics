@@ -23,20 +23,17 @@ public class ClusterWordCount {
 	String csvEntities = entityLine[0].substring(1);
 	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
 	String[] entityArr = csvEntities.split(",");
-	Map<String, Double> entityMap = new HashMap<String, Double>();
+	// Map<String, Double> entityMap = new HashMap<String, Double>();
+	List<String> entList = new ArrayList<String>();
+
 	for (String entity : entityArr) {
 	    if (entity.length() > 3) {
 		// System.out.println(entity);
-		String[] keyVal = entity.split("=");
-		if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
-		    String key = keyVal[0].trim();
-		    int val = Integer.parseInt(keyVal[1]);
-		    entityMap.put(key, (double) val);
-		}
+		entList.add(entity);
 	    }
 	}
-	entityMap = IOUtils.sortByValues(entityMap);
-	entityMap = getTopNEntities(entityMap, entityMap.size() / 5);
+	// entityMap = IOUtils.sortByValues(entityMap);
+	// entityMap = getTopNEntities(entityMap, entityMap.size() / 5);
 
 	File file = new File("clusters");
 	File[] clusters = file.listFiles();
@@ -44,7 +41,7 @@ public class ClusterWordCount {
 	int i = 0;
 	for (File cluster : clusters) {
 	    i++;
-	    threadList.add(new ClusterWordCountThread(i, cluster, entityMap));
+	    threadList.add(new ClusterWordCountThread(i, cluster, entList));
 	}
 	for (ClusterWordCountThread thread : threadList) {
 	    thread.run();
