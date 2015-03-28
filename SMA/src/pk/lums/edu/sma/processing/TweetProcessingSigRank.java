@@ -24,6 +24,7 @@ public class TweetProcessingSigRank {
     private static Map<Date, Integer> dateMap = new HashMap<Date, Integer>();
     private static Map<EntityPhraseDateModel, Double> entityDateMap = new HashMap<EntityPhraseDateModel, Double>();
     private static ArrayList<TweetDO> twtList = new ArrayList<TweetDO>();
+    private static String[] topEntities = null;
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
@@ -104,25 +105,7 @@ public class TweetProcessingSigRank {
 	for (EntityPhraseDateModel epdm : entityDateMap.keySet()) {
 	    epdm.sortAndRemove(2);
 	}
-
-	entityDateMap = IOUtils.sortByValues(entityDateMap);
-	// String text = entityDateMap.toString();
-	IOUtils.writeFile("Events.txt", entityDateMap.toString(), false);
-	String[] topEventPhrases = getTopNEntities(entityDateMap, 20);
-	String[] entsss = IOUtils.getTopNEntities(entityMap,
-		entityMap.size() / 10);
-	List<String> strList = new ArrayList<String>();
-	for (String str : entsss) {
-	    strList.add(str);
-	}
-	for (String eventP : topEventPhrases) {
-	    strList.add(eventP);
-	}
-
-	IOUtils.writeFile("Entities.txt",
-		Arrays.toString(strList.toArray(new String[strList.size()])),
-		false);
-
+	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
 	IOUtils.log("Going to process entities....");
 
 	// temporary copy entityDateMap
@@ -218,6 +201,23 @@ public class TweetProcessingSigRank {
 	    ent.setValue(g2);
 
 	}
+	entityDateMap = IOUtils.sortByValues(entityDateMap);
+	// String text = entityDateMap.toString();
+	IOUtils.writeFile("Events.txt", entityDateMap.toString(), false);
+	String[] topEventPhrases = getTopNEntities(entityDateMap, 20);
+	String[] entsss = IOUtils.getTopNEntities(entityMap,
+		entityMap.size() / 10);
+	List<String> strList = new ArrayList<String>();
+	for (String str : entsss) {
+	    strList.add(str);
+	}
+	for (String eventP : topEventPhrases) {
+	    strList.add(eventP);
+	}
+
+	IOUtils.writeFile("Entities.txt",
+		Arrays.toString(strList.toArray(new String[strList.size()])),
+		false);
 
 	EntityProcessorSigRank
 		.main(strList.toArray(new String[strList.size()]));
@@ -241,14 +241,14 @@ public class TweetProcessingSigRank {
 
     }
 
-    // private static String[] mapToStringArr() {
-    // // TODO Auto-generated method stub
-    // List<String> ents = new ArrayList<String>();
-    // for (Map.Entry<String, Double> ent : entityMap.entrySet()) {
-    // ents.add(ent.getKey());
-    // }
-    // return ents.toArray(new String[ents.size()]);
-    // }
+    private static String[] mapToStringArr() {
+	// TODO Auto-generated method stub
+	List<String> ents = new ArrayList<String>();
+	for (Map.Entry<String, Double> ent : entityMap.entrySet()) {
+	    ents.add(ent.getKey());
+	}
+	return ents.toArray(new String[ents.size()]);
+    }
 
     /**
      * This function get the next offset element from strTwtList starting from
