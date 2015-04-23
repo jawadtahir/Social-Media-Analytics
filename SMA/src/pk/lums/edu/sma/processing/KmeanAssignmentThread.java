@@ -42,7 +42,7 @@ public class KmeanAssignmentThread extends Thread {
 		    cent = c;
 		}
 	    }
-	    if (cent != null) {
+	    if (cent != null && entry.getKey() != null) {
 		clusters.get(cent).add(entry.getKey());
 	    }
 	}

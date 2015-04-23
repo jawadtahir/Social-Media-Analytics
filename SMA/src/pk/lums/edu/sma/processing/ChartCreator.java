@@ -18,11 +18,11 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 public class ChartCreator {
     private Map<String, Double> wordCount;
-    private String chartName;
+    private File cluster;
 
-    public ChartCreator(Map<String, Double> wordCount, String chartName) {
+    public ChartCreator(Map<String, Double> wordCount, File chartName) {
 	this.wordCount = wordCount;
-	this.chartName = chartName;
+	this.cluster = chartName;
     }
 
     public void create() {
@@ -30,14 +30,16 @@ public class ChartCreator {
 	// frame.setVisible(true);
 	// frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	// frame.setSize(2560, 1600);
+	String chartName = cluster.getName().substring(0,
+		cluster.getName().length() - 4);
 	DefaultCategoryDataset dataSet = createDataSet(wordCount);
 	JFreeChart chart = createChart(dataSet, chartName);
 	ChartPanel panel = new ChartPanel(chart);
 	panel.setPreferredSize(new Dimension(25600, 16000));
 	// frame.getContentPane().add(panel);
 	try {
-	    ChartUtilities.saveChartAsJPEG(new File(chartName + ".JPEG"),
-		    chart, 25600, 16000);
+	    ChartUtilities.saveChartAsJPEG(new File(cluster.getParent() + "/"
+		    + chartName + ".JPEG"), chart, 25600, 16000);
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();

@@ -236,9 +236,9 @@ public class TweetCollection {
 	// String[] track = { /* "snowmaggeddon2015", "blizzardof2015", */
 	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
 	// "university" };
-	String[] track = { "cwc", "cwc15", "cwc2015", "zimbabwe", "sangakkara",
-		"swine flu", "germanwings", "andreas Lubitz", "ausvnz",
-		"nzvaus", "ausvsnz", "nzvsaus", "kohli", "unicef", "polio" };
+	String[] track = { "cwc", "cwc15", "cwc2015", "swine flu",
+		"germanwings", "andreas Lubitz", "ausvnz", "nzvaus", "ausvsnz",
+		"nzvsaus", "unicef", "polio" };
 	return track;
     }
 

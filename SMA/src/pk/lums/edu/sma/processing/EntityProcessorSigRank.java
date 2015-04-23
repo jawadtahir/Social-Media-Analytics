@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -113,35 +114,65 @@ public class EntityProcessorSigRank {
 	printClusters(cluster);
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 
-	// IOUtils.log("Creating threads....");
-	// int noOfEntityPerThread = (int) topEntities.length / NO_OF_THREADS;
-	// for (int i = 0; i < NO_OF_THREADS; i++) {
-	// String[] entitiesForThread = getNextMelements(i
-	// * noOfEntityPerThread, noOfEntityPerThread);
-	// ProcessEntities entityThread = new ProcessEntities(
-	// entitiesForThread, i);
-	// threadList.add(entityThread);
-	// }
-	//
-	// IOUtils.log("Starting Threads");
-	// for (ProcessEntities pThread : threadList) {
-	// pThread.start();
-	// }
-	//
-	// IOUtils.log("Waiting for threads to die....");
-	// for (ProcessEntities pThread : threadList) {
-	// try {
-	// pThread.join();
-	// } catch (InterruptedException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	// IOUtils.log("All threads completed their work!");
     }
 
     private static void printClusters(
-	    HashMap<double[], SortedSet<Integer>> cluster) {
+	    Map<double[], SortedSet<Integer>> clusters, int iteration) {
+	// TODO Auto-generated method stub
+	IOUtils.clearClusterFolder();
+	Iterator<double[]> itr = clusters.keySet().iterator();
+	Connection con = null;
+	PreparedStatement pst = null;
+	try {
+	    con = IOUtils.getConnection();
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	int i = 0;
+	while (itr.hasNext()) {
+	    double[] key = itr.next();
+	    SortedSet<Integer> tweets = clusters.get(key);
+	    Iterator<Integer> setItr = tweets.iterator();
+	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
+	    i++;
+	    while (setItr.hasNext()) {
+		int id = setItr.next();
+		try {
+		    pst.setInt(1, id);
+		    List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+			    .executeQuery());
+		    tdoList.add(tempList.get(0));
+		} catch (SQLException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+	    }
+
+	    printCluster(tdoList, i, iteration);
+	}
+
+    }
+
+    private static void printCluster(List<TweetDO> tdoList, int i, int iteration) {
+	// TODO Auto-generated method stub
+	File file = new File("clusters" + iteration);
+	if (!file.exists()) {
+	    file.mkdir();
+	}
+	StringBuilder sb = new StringBuilder();
+	for (int j = 0; j < tdoList.size(); j++) {
+	    TweetDO tdo = tdoList.get(j);
+	    sb.append(tdo.getTextTweet().trim() + " , "
+		    + tdo.getDateTextTweet().trim() + " , " + tdo.getId()
+		    + " , " + tdo.getLocTweet().trim() + "\n");
+	}
+	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
+		.toString().trim());
+
+    }
+
+    private static void printClusters(Map<double[], SortedSet<Integer>> cluster) {
 	// TODO Auto-generated method stub
 	IOUtils.clearClusterFolder();
 	Iterator<double[]> itr = cluster.keySet().iterator();
@@ -272,7 +303,7 @@ public class EntityProcessorSigRank {
 	    List<TweetDO> tweets, LinkedHashMap<Integer, double[]> vecspace,
 	    int k) {
 	Map<double[], SortedSet<Integer>> clusters = new HashMap<double[], SortedSet<Integer>>();
-	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
+	HashMap<double[], SortedSet<Integer>> step = new HashMap<double[], SortedSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
 	int maxiter = 20;
@@ -290,13 +321,16 @@ public class EntityProcessorSigRank {
 	    for (int r : rand) {
 		double[] temp = new double[vecspace.get(r).length];
 		System.arraycopy(vecspace.get(r), 0, temp, 0, temp.length);
-		step.put(temp, new TreeSet<Integer>());
+		step.put(temp, Collections
+			.synchronizedSortedSet(new TreeSet<Integer>()));
 	    }
 	    boolean go = true;
 	    int iter = 0;
 	    while (go) {
 		IOUtils.log("Iter : " + iter);
-		clusters = new HashMap<double[], SortedSet<Integer>>(step);
+		clusters = Collections
+			.synchronizedMap(new HashMap<double[], SortedSet<Integer>>(
+				step));
 		List<KmeanAssignmentThread> assThrdLst = new ArrayList<KmeanAssignmentThread>();
 		// cluster assignment step
 		int noOfVecSpPrThread = vecspace.size() / NO_OF_THREADS;
@@ -385,6 +419,13 @@ public class EntityProcessorSigRank {
 	    }
 	    errorsums.put(sumsim, new HashMap<double[], SortedSet<Integer>>(
 		    clusters));
+
+	    try {
+		printClusters(clusters, init + 1);
+	    } catch (Exception ex) {
+		IOUtils.log(ex.getMessage());
+		System.out.println(ex.getMessage());
+	    }
 
 	}
 	// pick the clustering with the maximum similarity sum and print the

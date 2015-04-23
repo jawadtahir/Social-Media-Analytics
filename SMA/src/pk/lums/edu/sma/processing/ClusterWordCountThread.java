@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
@@ -37,7 +38,7 @@ public class ClusterWordCountThread extends Thread {
 	    if (tdo != null) {
 		String[] subStrs = tdo.getTextTweet().split(" ");
 		for (String string : subStrs) {
-		    string = string.toLowerCase().trim();
+		    string = removeHash(string.toLowerCase().trim());
 		    if (entList.contains(string.toLowerCase().trim())) {
 			if (wordCount.containsKey(string)) {
 			    wordCount.put(string, wordCount.get(string) + 1);
@@ -52,11 +53,23 @@ public class ClusterWordCountThread extends Thread {
 	// IOUtils.writeFile(fileName.getName(), wordCount.toString(), true);
 	wordCount = getTopNEntities(wordCount, 100);
 
-	IOUtils.log(wordCount.toString());
-	ChartCreator cc = new ChartCreator(wordCount, fileName.getName()
-		.substring(0, fileName.getName().length() - 4));
-	cc.create();
+	System.out.println(fileName.getName() + " : " + wordCount.toString());
+	// ChartCreator cc = new ChartCreator(wordCount, fileName);
+	// cc.create();
 
+    }
+
+    public static String removeHash(String hashTag) {
+	String ht;
+	ht = hashTag.replace("#", "");
+	return ht;
+    }
+
+    public static int countSubstring(String str, String subStr) {
+	// the result of split() will contain one more element than the
+	// delimiter
+	// the "-1" second argument makes it not discard trailing empty strings
+	return str.split(Pattern.quote(subStr), -1).length - 1;
     }
 
     private TweetDO stringToDO(String text) {

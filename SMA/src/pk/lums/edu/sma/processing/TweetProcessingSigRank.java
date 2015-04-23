@@ -53,7 +53,7 @@ public class TweetProcessingSigRank {
 	dateMap = Collections.synchronizedMap(dateMap);
 	entityDateMap = Collections.synchronizedMap(entityDateMap);
 	// Empty out cluster folder
-	IOUtils.clearClusterFolder();
+	// IOUtils.clearClusterFolder();
 	// IOUtils.log("Populating tweet array list....");
 	// // populate strTwtList
 	// for (String tweet : tweets) {
