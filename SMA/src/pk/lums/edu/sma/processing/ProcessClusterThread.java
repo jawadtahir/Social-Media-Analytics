@@ -14,6 +14,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -177,6 +178,15 @@ public class ProcessClusterThread extends Thread {
 		}
 	    }
 	    count++;
+	}
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(maxDate);
+	cal.add(Calendar.DAY_OF_YEAR, 1);
+	try {
+	    maxDate = df.parse((cal.toString()));
+	} catch (ParseException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
 	}
 	return new Date[] { minDate, maxDate };
     }
