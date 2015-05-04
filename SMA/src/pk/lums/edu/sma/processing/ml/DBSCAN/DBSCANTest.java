@@ -101,8 +101,8 @@ public class DBSCANTest {
 	Map<Integer, ArrayList<Integer>> clusterMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
 
 	DBSCAN clusterer = new DBSCAN();
-	clusterer.setEpsilon(0.5);
-	clusterer.setMinPoints(5);
+	clusterer.setEpsilon(2.5);
+	clusterer.setMinPoints(10);
 	try {
 	    clusterer.buildClusterer(filteredInstance);
 	} catch (Exception e) {
@@ -126,7 +126,7 @@ public class DBSCANTest {
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Printing Clusters");
 	System.out.println(clusterMap);
-	printClusters(clusterMap, 0);
+	printClusters(clusterMap, 6);
     }
 
     private static void insertClusterMap(
@@ -206,6 +206,7 @@ public class DBSCANTest {
 	File file = new File("clusters" + iteration);
 	if (!file.exists()) {
 	    file.mkdir();
+	    IOUtils.clearClusterFolder("clusters" + iteration);
 	}
 	StringBuilder sb = new StringBuilder();
 	for (int j = 0; j < tdoList.size(); j++) {

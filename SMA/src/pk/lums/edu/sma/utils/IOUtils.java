@@ -123,6 +123,26 @@ public class IOUtils {
     }
 
     /**
+     * Inserts given key in given map. if there is no key in map it will add new
+     * key of value 1 otherwise it will increment the value of key.
+     * 
+     * @param map
+     *            Given map.
+     * @param key
+     *            given key
+     */
+
+    public static <K> void insertInMap(Map<K, Integer> map, K key) {
+	if (map.containsKey(key)) {
+	    Integer i = (Integer) map.get(key);
+	    i++;
+	    map.put(key, i);
+	} else {
+	    map.put(key, 1);
+	}
+    }
+
+    /**
      * get top n number of entries from map
      * 
      * @param map
@@ -173,6 +193,19 @@ public class IOUtils {
      */
     public static void clearClusterFolder() {
 	File dir = new File("clusters");
+	if (!dir.exists()) {
+	    return;
+	}
+	for (File file : dir.listFiles()) {
+	    file.delete();
+	}
+    }
+
+    /**
+     * Clears given clusters folder
+     */
+    public static void clearClusterFolder(String clusterFolder) {
+	File dir = new File(clusterFolder);
 	if (!dir.exists()) {
 	    return;
 	}

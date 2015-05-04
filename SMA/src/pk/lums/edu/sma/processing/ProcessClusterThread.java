@@ -16,7 +16,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import pk.lums.edu.sma.utils.IOUtils;
 
@@ -25,7 +27,7 @@ public class ProcessClusterThread extends Thread {
     private List<File> allFileArr = null;
     private String name = null;
     private ArrayList<File> fileArr = null;
-    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
     Thread t = null;
 
     public ProcessClusterThread(List<File> filesToProc, String name,
@@ -115,9 +117,10 @@ public class ProcessClusterThread extends Thread {
     // }
 
     private Date[] getRange(String[] tweets) {
+	Map<Date, Integer> dateMap = new LinkedHashMap<Date, Integer>();
 	int tweetCount = 0;
-	Date maxDate = null;
-	Date minDate = null;
+	// Date maxDate = null;
+	// Date minDate = null;
 	for (String tweet : tweets) {
 	    StringBuilder sb = new StringBuilder(tweet);
 	    sb.append("  ");
@@ -128,16 +131,17 @@ public class ProcessClusterThread extends Thread {
 		date = date.replace(",", "");
 		try {
 		    time = df.parse(date);
-		    if (tweetCount != 0) {
-			if (time.after(maxDate)) {
-			    maxDate = time;
-			} else if (time.before(minDate)) {
-			    minDate = time;
-			}
-		    } else {
-			maxDate = time;
-			minDate = time;
-		    }
+		    IOUtils.insertInMap(dateMap, time);
+		    // if (tweetCount != 0) {
+		    // if (time.after(maxDate)) {
+		    // maxDate = time;
+		    // } else if (time.before(minDate)) {
+		    // minDate = time;
+		    // }
+		    // } else {
+		    // maxDate = time;
+		    // minDate = time;
+		    // }
 		    tweetCount++;
 		} catch (ParseException e) {
 		    // TODO Auto-generated catch block
@@ -145,6 +149,34 @@ public class ProcessClusterThread extends Thread {
 		}
 
 	    }
+	}
+	dateMap = IOUtils.sortByValues(dateMap);
+	System.out.println(dateMap);
+	Date range[] = getTopNDateRange(dateMap, 5);
+
+	return range;
+    }
+
+    private Date[] getTopNDateRange(Map<Date, Integer> dateMap, int i) {
+	// TODO Auto-generated method stub
+	Date minDate = null, maxDate = null;
+	int count = 0;
+	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
+	    if (count == 0) {
+		minDate = ent.getKey();
+		maxDate = ent.getKey();
+	    } else {
+		if (count > i) {
+		    break;
+		} else {
+		    if (ent.getKey().after(maxDate)) {
+			maxDate = ent.getKey();
+		    } else if (ent.getKey().before(minDate)) {
+			minDate = ent.getKey();
+		    }
+		}
+	    }
+	    count++;
 	}
 	return new Date[] { minDate, maxDate };
     }

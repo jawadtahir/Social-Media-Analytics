@@ -156,7 +156,7 @@ public class TweetCollection {
 	// getting connection URLs
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.INSERT_QUERY_NEW);
+	    pst = con.prepareStatement(TweetDO.INSERT_QUERY_US);
 	} catch (SQLException e) {
 	    // TODO Auto-generated catch block
 	    IOUtils.log(e.getMessage());
@@ -236,9 +236,7 @@ public class TweetCollection {
 	// String[] track = { /* "snowmaggeddon2015", "blizzardof2015", */
 	// "airport", "road", "rescue", "power", "traffic", "closure", "school",
 	// "university" };
-	String[] track = { "cwc", "cwc15", "cwc2015", "swine flu",
-		"germanwings", "andreas Lubitz", "ausvnz", "nzvaus", "ausvsnz",
-		"nzvsaus", "unicef", "polio" };
+	String[] track = { "nepal", "earthquake", "rescue", "relief" };
 	return track;
     }
 

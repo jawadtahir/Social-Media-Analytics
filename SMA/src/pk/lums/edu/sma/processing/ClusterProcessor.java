@@ -22,19 +22,20 @@ public class ClusterProcessor {
 	if (!relationDir.exists()) {
 	    relationDir.mkdir();
 	}
+
 	clearDir(relationDir.getAbsolutePath());
 
 	System.out.println(Calendar.getInstance().getTime().toString());
-	File clusterDir = new File("clusters");
+	File clusterDir = new File("clusters1");
 	// clustModList = Collections
 	// .synchronizedList(new ArrayList<ClusterModel>());
 	System.out.println(clusterDir.listFiles().length);
 	int count = 0;
 	for (File cluster : clusterDir.listFiles()) {
-	    fileList.add(cluster);
-	    if (cluster.getName().length() > 8
-		    && !cluster.getName().contains("-")) {
 
+	    if (cluster.getName().length() > 8
+		    && cluster.getName().contains("cluster-")) {
+		fileList.add(cluster);
 		// String[] tweets =
 		// IOUtils.readFile(cluster.getAbsolutePath());
 		// String clusterName = cluster.getName().substring(0,
