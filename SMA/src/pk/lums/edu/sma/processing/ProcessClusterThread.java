@@ -47,7 +47,7 @@ public class ProcessClusterThread extends Thread {
 
     private void process() {
 	// TODO Auto-generated method stub
-	File relationDir = new File("Relationship");
+	File relationDir = new File("Relationship1");
 	if (!relationDir.exists()) {
 	    relationDir.mkdir();
 	}
@@ -81,6 +81,9 @@ public class ProcessClusterThread extends Thread {
 		    for (ClusterModel cModel : rClustMod) {
 			sb.append(cModel.toString() + "\n");
 		    }
+		    double simNum = (double) (rClustMod.size())
+			    / (double) (tweetsEntTemp.length);
+		    sb.append(simNum);
 		    File tempFile = new File(relationDir.getAbsoluteFile()
 			    + "/" + cClusterName);
 		    if (!tempFile.exists()) {
@@ -153,9 +156,27 @@ public class ProcessClusterThread extends Thread {
 	}
 	dateMap = IOUtils.sortByValues(dateMap);
 	System.out.println(dateMap);
-	Date range[] = getTopNDateRange(dateMap, 5);
+	Date range[] = getTopNDateRange(dateMap, findN(dateMap));
 
 	return range;
+    }
+
+    private int findN(Map<Date, Integer> dateMap) {
+	// TODO Auto-generated method stub
+	int sum = 0;
+	int N = 0;
+	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
+	    sum += ent.getValue();
+	}
+	int instSum = 0;
+	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
+	    N++;
+	    instSum += ent.getValue();
+	    if (instSum > (sum / 2)) {
+		break;
+	    }
+	}
+	return N;
     }
 
     private Date[] getTopNDateRange(Map<Date, Integer> dateMap, int i) {
@@ -167,7 +188,7 @@ public class ProcessClusterThread extends Thread {
 		minDate = ent.getKey();
 		maxDate = ent.getKey();
 	    } else {
-		if (count > i) {
+		if (count >= i) {
 		    break;
 		} else {
 		    if (ent.getKey().after(maxDate)) {
@@ -182,12 +203,8 @@ public class ProcessClusterThread extends Thread {
 	Calendar cal = Calendar.getInstance();
 	cal.setTime(maxDate);
 	cal.add(Calendar.DAY_OF_YEAR, 1);
-	try {
-	    maxDate = df.parse((cal.toString()));
-	} catch (ParseException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
+	maxDate = cal.getTime();
+
 	return new Date[] { minDate, maxDate };
     }
 
