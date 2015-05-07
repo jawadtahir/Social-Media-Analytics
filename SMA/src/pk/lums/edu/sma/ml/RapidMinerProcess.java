@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.test;
+package pk.lums.edu.sma.ml;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import com.rapidminer.operator.clustering.Cluster;
 import com.rapidminer.operator.clustering.ClusterModel;
 import com.rapidminer.tools.XMLException;
 
-public class RapidMinerTest {
+public class RapidMinerProcess {
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
@@ -79,7 +79,7 @@ public class RapidMinerTest {
 	    clustMap.put(clust.getClusterId(), (List) clust.getExampleIds());
 	}
 
-	printClusters(clustMap, 5);
+	printClusters(clustMap, 7);
 	RapidMiner.quit(ExitMode.NORMAL);
 	// use the result(s) as needed, for example if your process just returns
 	// one ExampleSet, use this:
