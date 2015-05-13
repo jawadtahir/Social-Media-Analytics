@@ -6,9 +6,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -104,26 +104,31 @@ public class RapidMinerProcessCLI extends Thread {
 	for (Cluster clust : cmodel.getClusters()) {
 	    clustMap.put(clust.getClusterId(), (List) clust.getExampleIds());
 	}
-	List<Double> listScore = new ArrayList<Double>();
+	Map<List<Integer>, Double> listScore = new LinkedHashMap<List<Integer>, Double>();
 	for (Map.Entry<Integer, List<Double>> ent : clustMap.entrySet()) {
 	    int clustSize = ent.getValue().size();
 	    int count = 0;
+	    List<Integer> tweetIds = new ArrayList<Integer>();
 	    for (Double did : ent.getValue()) {
-
+		tweetIds.add(did.intValue());
 		if (listTweetR.contains((did.intValue()))) {
 		    count++;
 		}
 	    }
 	    Double ratio = (double) count / (double) clustSize;
 	    if (ratio > 0.25 && ratio < 0.75) {
-		listScore.add(ratio * clustSize);
+		listScore.put(tweetIds, ratio * clustSize);
 	    }
 	}
-	Collections.sort(listScore);
+	IOUtils.sortByValues(listScore);
+	Map.Entry<List<Integer>, Double> ent = listScore.entrySet().iterator()
+		.next();
 	TestObject to = new TestObject(nameCluster1, nameCluster2,
-		new ArrayList<Integer>(), listScore.get(0));
+		ent.getKey(), ent.getValue());
 
-	printClusters(clustMap, 7);
+	listObjects.add(to);
+
+	// printClusters(clustMap, 7);
 	RapidMiner.quit(ExitMode.NORMAL);
 	// use the result(s) as needed, for example if your process just returns
 	// one ExampleSet, use this:

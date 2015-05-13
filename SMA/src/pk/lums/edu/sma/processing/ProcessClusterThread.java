@@ -57,12 +57,25 @@ public class ProcessClusterThread extends Thread {
 	    IOUtils.log("Thread - " + this.getName() + " Count = " + count
 		    + " Cluster: " + cFile.getName());
 	    String[] tweetsEnt = IOUtils.readFile(cFile.getAbsolutePath());
+	    StringBuilder sbTemp = new StringBuilder();
 	    String cClusterName = cFile.getName().substring(0,
 		    cFile.getName().length() - 4);
+	    File tempFile = new File(relationDir.getAbsoluteFile() + "/"
+		    + cClusterName);
+	    if (!tempFile.exists()) {
+		tempFile.mkdir();
+	    }
+
 	    List<ClusterModel> cClustMod = makeClusterModelList(tweetsEnt,
 		    cClusterName);
+	    for (ClusterModel cmodel : cClustMod) {
+		sbTemp.append(cmodel.toString() + "\n");
+	    }
+	    IOUtils.writeFile(tempFile.getAbsolutePath() + "/" + cClusterName
+		    + ".txt", sbTemp.toString(), false);
 	    Date[] dateRange = getRange(tweetsEnt);
 	    for (File rFile : allFileArr) {
+		StringBuilder sb = new StringBuilder();
 		if (!rFile.getName().equals(cFile.getName())) {
 		    String[] tweetsEntTemp = IOUtils.readFile(rFile
 			    .getAbsolutePath());
@@ -70,25 +83,14 @@ public class ProcessClusterThread extends Thread {
 			    rFile.getName().length() - 4);
 		    List<ClusterModel> rClustMod = makeClusterModelList(
 			    tweetsEntTemp, rClusterName, dateRange);
-		    StringBuilder sb = new StringBuilder();
-		    sb.append("********************" + cClusterName
-			    + "********************\n");
-		    for (ClusterModel cModel : cClustMod) {
-			sb.append(cModel.toString() + "\n");
-		    }
-		    sb.append("********************" + rClusterName
-			    + "********************\n");
+
 		    for (ClusterModel cModel : rClustMod) {
 			sb.append(cModel.toString() + "\n");
 		    }
 		    double simNum = (double) (rClustMod.size())
 			    / (double) (tweetsEntTemp.length);
 		    sb.append(simNum);
-		    File tempFile = new File(relationDir.getAbsoluteFile()
-			    + "/" + cClusterName);
-		    if (!tempFile.exists()) {
-			tempFile.mkdir();
-		    }
+
 		    IOUtils.writeFile(tempFile.getAbsolutePath() + "/"
 			    + cClusterName + "_" + rClusterName + ".txt",
 			    sb.toString(), false);
