@@ -16,7 +16,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 public class TweetProcessing {
 
     private final static int NO_OF_THREADS = 4;
-    private static Map<String, Double> entityMap = new HashMap<String, Double>();
+    private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
     private static ArrayList<String> strTwtList = new ArrayList<String>();
     private static String[] topEntities = null;
 
@@ -45,7 +45,7 @@ public class TweetProcessing {
 	// Creating a synchronized hashed map so that all threads can share data
 	entityMap = Collections.synchronizedMap(entityMap);
 	// Empty out cluster folder
-	IOUtils.clearClusterFolder();
+	// IOUtils.clearClusterFolder();
 	// IOUtils.log("Populating tweet array list....");
 	// // populate strTwtList
 	// for (String tweet : tweets) {
@@ -54,14 +54,14 @@ public class TweetProcessing {
 
 	// This number of tweets will be assigned to each thread
 	int noOfTweetsPerThread = strTwtList.size() / NO_OF_THREADS;
-	ArrayList<NerUsageExample> threadList = new ArrayList<NerUsageExample>();
+	ArrayList<GetEntities> threadList = new ArrayList<GetEntities>();
 	IOUtils.log("Creating threads....");
 
 	// Creating threads
 	for (int i = 0; i < NO_OF_THREADS; i++) {
 	    String[] tweetsForThread = getNextMelements(
 		    i * noOfTweetsPerThread, noOfTweetsPerThread);
-	    NerUsageExample thread = new NerUsageExample(tweetsForThread,
+	    GetEntities thread = new GetEntities(tweetsForThread,
 		    Integer.toString(i), entityMap);
 	    threadList.add(thread);
 	}
@@ -69,13 +69,13 @@ public class TweetProcessing {
 	IOUtils.log("Strating threads....");
 
 	// Starting threads...
-	for (NerUsageExample thread : threadList) {
+	for (GetEntities thread : threadList) {
 	    thread.start();
 	}
 
 	IOUtils.log("Waiting for threads to close");
 	// Waiting for threads to close....
-	for (NerUsageExample thread : threadList) {
+	for (GetEntities thread : threadList) {
 	    try {
 		thread.join();
 	    } catch (InterruptedException e) {

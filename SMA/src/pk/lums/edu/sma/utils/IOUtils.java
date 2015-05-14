@@ -152,7 +152,8 @@ public class IOUtils {
      * @return top n number of entries from map, in map format
      */
 
-    public static String[] getTopNEntities(Map<String, Double> map, int n) {
+    public static <V extends Comparable> String[] getTopNEntities(
+	    Map<String, V> map, int n) {
 	Iterator<String> itr = map.keySet().iterator();
 	int i = 0;
 	ArrayList<String> entites = new ArrayList<String>();
