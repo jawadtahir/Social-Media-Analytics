@@ -111,14 +111,16 @@ public class TweetDO {
 	ArrayList<TweetDO> tweetArr = new ArrayList<TweetDO>();
 	if (res != null) {
 	    try {
+		int count = 0;
 		while (res.next()) {
+		    IOUtils.log(Integer.toString(count));
 		    TweetDO tdo = new TweetDO();
 		    tdo.setId(res.getLong("idTWEETDTA"));
 		    tdo.setTextTweet(res.getString("textTweet"));
 		    tdo.setDateTextTweet(res.getString("dateTextTweet"));
 		    tdo.setLocTweet(res.getString("locationTweet"));
 		    tweetArr.add(tdo);
-		    System.gc();
+		    // System.gc();
 		}
 	    } catch (SQLException e) {
 		// TODO Auto-generated catch block

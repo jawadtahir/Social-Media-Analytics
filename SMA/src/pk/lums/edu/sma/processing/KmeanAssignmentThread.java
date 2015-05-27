@@ -32,10 +32,11 @@ public class KmeanAssignmentThread extends Thread {
 	for (Map.Entry<Integer, double[]> entry : vecSpaceMap.entrySet()) {
 	    i++;
 	    if (i % 1000 == 0)
-		IOUtils.log(this.getName() + " : " + i);
+		IOUtils.log(this.getName() + " : " + i + " : " + entry.getKey());
 	    double[] cent = null;
 	    double sim = 0;
 	    for (double[] c : clusters.keySet()) {
+		// IOUtils.log("before" + c);
 		double csim = cosSim(entry.getValue(), c);
 		if (csim > sim) {
 		    sim = csim;
@@ -43,7 +44,11 @@ public class KmeanAssignmentThread extends Thread {
 		}
 	    }
 	    if (cent != null && entry.getKey() != null) {
-		clusters.get(cent).add(entry.getKey());
+		try {
+		    clusters.get(cent).add(entry.getKey());
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
 	    }
 	}
     }

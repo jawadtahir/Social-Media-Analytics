@@ -325,6 +325,7 @@ public class EntityProcessor {
 		// centroid update step
 		step.clear();
 		for (double[] cent : clusters.keySet()) {
+		    IOUtils.log("Updating centroids");
 		    double[] updatec = new double[cent.length];
 		    for (int d : clusters.get(cent)) {
 			double[] doc = vecspace.get(d);
@@ -333,13 +334,18 @@ public class EntityProcessor {
 		    }
 		    for (int i = 0; i < updatec.length; i++) {
 			double temp = 0;
+			String a = "";
 			try {
-			    temp = Double.parseDouble(df.format(updatec[i]
-				    / clusters.get(cent).size()));
+			    a = df.format(updatec[i]
+				    / clusters.get(cent).size());
+			    temp = Double.parseDouble(a);
 
 			} catch (NumberFormatException ex) {
 			    System.out.println(ex.getMessage());
 			    System.out.println(ex.getCause());
+			    System.out.println(a);
+			    System.out.println(updatec[i]);
+			    System.out.println(clusters.get(cent).size());
 			} finally {
 			    updatec[i] = temp;
 			}
@@ -431,8 +437,10 @@ public class EntityProcessor {
 		// e.printStackTrace();
 		// }
 	    }
-	    sb.deleteCharAt(sb.length());
+	    sb.deleteCharAt(sb.length() - 1);
 	    sb.append(");");
+	    IOUtils.log(sb.toString());
+	    System.out.println(sb.toString());
 	    try {
 		pst = con.prepareStatement(sb.toString());
 		ResultSet res = pst.executeQuery();
