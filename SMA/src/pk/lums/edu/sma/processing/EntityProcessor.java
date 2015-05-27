@@ -404,28 +404,46 @@ public class EntityProcessor {
 	PreparedStatement pst = null;
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
+	    // pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
 	int i = 0;
 	while (itr.hasNext()) {
+	    StringBuilder sb = new StringBuilder();
 	    double[] key = itr.next();
 	    SortedSet<Integer> tweets = clusters.get(key);
 	    Iterator<Integer> setItr = tweets.iterator();
 	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
 	    i++;
+	    sb.append("SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTAUS where idTWEETDTA IN (");
 	    while (setItr.hasNext()) {
 		int id = setItr.next();
-		try {
-		    pst.setInt(1, id);
-		    List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
-			    .executeQuery());
-		    tdoList.add(tempList.get(0));
-		} catch (SQLException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
+		sb.append(id + " ,");
+
+		// try {
+		// pst.setInt(1, id);
+		// List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+		// .executeQuery());
+		// tdoList.add(tempList.get(0));
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+	    }
+	    sb.deleteCharAt(sb.length());
+	    sb.append(");");
+	    try {
+		pst = con.prepareStatement(sb.toString());
+		ResultSet res = pst.executeQuery();
+		List<TweetDO> templist = TweetDO
+			.translateTextIdDateLocTweetDO(res);
+		for (TweetDO tweetDO : templist) {
+		    tdoList.add(tweetDO);
 		}
+	    } catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	    }
 
 	    printCluster(tdoList, i, iteration);
