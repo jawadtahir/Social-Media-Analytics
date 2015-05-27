@@ -15,7 +15,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 
 public class TweetProcessing {
 
-    private final static int NO_OF_THREADS = 4;
+    private final static int NO_OF_THREADS = 8;
     private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
     private static ArrayList<String> strTwtList = new ArrayList<String>();
     private static String[] topEntities = null;
@@ -93,6 +93,11 @@ public class TweetProcessing {
 	IOUtils.writeFile("Entities.txt", entityMap.toString(), false);
 	IOUtils.log(entityMap.toString());
 	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
+	StringBuilder sb = new StringBuilder();
+	for (String tempStr : topEntities) {
+	    sb.append(tempStr + " , ");
+	}
+	IOUtils.writeFile("TopEnt.txt", sb.toString());
 	IOUtils.log("Going to process entities....");
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);
@@ -106,7 +111,8 @@ public class TweetProcessing {
 	// } catch (Exception e) {
 	// // TODO: handle exception
 	// e.printStackTrace();
-	// }
+	// }// Reading tweets
+
 	// }
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("***************************************************************Program end*****************************************************************************");

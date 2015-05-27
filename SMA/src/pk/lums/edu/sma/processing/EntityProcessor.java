@@ -25,7 +25,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityProcessor {
 
-    private static final int NO_OF_THREADS = 10;
+    private static final int NO_OF_THREADS = 4;
     private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
@@ -35,27 +35,32 @@ public class EntityProcessor {
 	// TODO Auto-generated method stub
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Processing entities...");
-	String[] entityLine = IOUtils.readFile("Entities.txt");
-	String csvEntities = entityLine[0].substring(1);
-	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
-	String[] entityArr = csvEntities.split(",");
+	String[] entityLine = IOUtils.readFile("EntLine.csv");
+	// String csvEntities = entityLine[0].substring(1);
+	// csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
+	// String[] entityArr = csvEntities.split(", ");
 	Map<String, Double> entityMap = new HashMap<String, Double>();
-	for (String entity : entityArr) {
-	    if (entity.length() > 3) {
+	StringBuilder sb = new StringBuilder();
+	int count = 0;
+	for (String entity : entityLine) {
+	    count++;
+	    if (count <= 100) {
 		// System.out.println(entity);
-		String[] keyVal = entity.split("=");
-		if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
-		    String key = keyVal[0].trim();
-		    int val = Integer.parseInt(keyVal[1]);
-		    entityMap.put(key, (double) val);
-		}
+		String[] keyVal = entity.split(", ");
+		// if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
+		String key = keyVal[0].trim();
+		int val = Integer.parseInt(keyVal[1]);
+		entityMap.put(key, (double) val);
+		sb.append(key + ", " + val + "\n");
+		// }
 	    }
 	}
+	// IOUtils.writeFile("EntLine.csv", sb.toString(), false);
 	entityMap = IOUtils.sortByValues(entityMap);
-	String[] topEntities = IOUtils.getTopNEntities(entityMap,
-		entityMap.size() / FRACTION_OF_TWEETS_TO_PROCESS);
-	for (String entity : topEntities) {
-	    topEntList.add(entity.trim());
+	// String[] topEntities = IOUtils.getTopNEntities(entityMap,
+	// entityMap.size() / FRACTION_OF_TWEETS_TO_PROCESS);
+	for (Map.Entry<String, Double> entity : entityMap.entrySet()) {
+	    topEntList.add(entity.getKey().trim().toLowerCase());
 	}
 
 	IOUtils.log(Calendar.getInstance().getTime().toString());
@@ -63,7 +68,7 @@ public class EntityProcessor {
 	List<TweetDO> tweets = null;
 	try {
 	    ResultSet res = IOUtils.getConnection()
-		    .prepareStatement(TweetDO.SELECT_ALL_ID_TEXT_QUERY)
+		    .prepareStatement(TweetDO.SELECT_ALL_ID_TEXT_QUERY_US)
 		    .executeQuery();
 	    tweets = TweetDO.translateTextIdTweetDO(res);
 
@@ -76,7 +81,7 @@ public class EntityProcessor {
 	IOUtils.log("Creating vector space of all tweets...");
 	LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
-	int count = 0;
+	count = 0;
 	for (Iterator<TweetDO> it = tweets.iterator(); it.hasNext();) {
 	    count++;
 	    if (count % 1000 == 0)
@@ -135,7 +140,7 @@ public class EntityProcessor {
 	PreparedStatement pst = null;
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID);
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
 	} catch (SQLException e) {
 	    e.printStackTrace();
 	}
@@ -178,7 +183,7 @@ public class EntityProcessor {
 		    + " , " + tdo.getLocTweet().trim() + "\n");
 	}
 	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
-		.toString().trim());
+		.toString().trim(), false);
 
     }
 
@@ -259,15 +264,16 @@ public class EntityProcessor {
 	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
-	int maxiter = 20;
+	int maxiter = 15;
 	for (int init = 0; init < 3; init++) {
+	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Round : " + init);
 	    clusters.clear();
 	    step.clear();
 	    rand.clear();
 	    // randomly initialize cluster centers
 	    while (rand.size() < k) {
-		int randNo = (int) ((Math.random() * vecspace.size()) + 1000000);
+		int randNo = (int) ((Math.random() * vecspace.size()));
 		if (vecspace.get(randNo) != null)
 		    rand.add(randNo);
 	    }
@@ -279,6 +285,7 @@ public class EntityProcessor {
 	    boolean go = true;
 	    int iter = 0;
 	    while (go) {
+		IOUtils.log(Calendar.getInstance().getTime().toString());
 		IOUtils.log("Iter : " + iter);
 		clusters = new HashMap<double[], SortedSet<Integer>>(step);
 		List<KmeanAssignmentThread> assThrdLst = new ArrayList<KmeanAssignmentThread>();
@@ -369,6 +376,12 @@ public class EntityProcessor {
 	    }
 	    errorsums.put(sumsim, new HashMap<double[], SortedSet<Integer>>(
 		    clusters));
+	    try {
+		printClusters(clusters, init + 1);
+	    } catch (Exception ex) {
+		IOUtils.log(ex.getMessage());
+		System.out.println(ex.getMessage());
+	    }
 
 	}
 	// pick the clustering with the maximum similarity sum and print the
@@ -381,4 +394,61 @@ public class EntityProcessor {
 	return con;
 
     }
+
+    private static void printClusters(
+	    Map<double[], SortedSet<Integer>> clusters, int iteration) {
+	// TODO Auto-generated method stub
+	IOUtils.clearClusterFolder();
+	Iterator<double[]> itr = clusters.keySet().iterator();
+	Connection con = null;
+	PreparedStatement pst = null;
+	try {
+	    con = IOUtils.getConnection();
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	int i = 0;
+	while (itr.hasNext()) {
+	    double[] key = itr.next();
+	    SortedSet<Integer> tweets = clusters.get(key);
+	    Iterator<Integer> setItr = tweets.iterator();
+	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
+	    i++;
+	    while (setItr.hasNext()) {
+		int id = setItr.next();
+		try {
+		    pst.setInt(1, id);
+		    List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+			    .executeQuery());
+		    tdoList.add(tempList.get(0));
+		} catch (SQLException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+	    }
+
+	    printCluster(tdoList, i, iteration);
+	}
+
+    }
+
+    private static void printCluster(List<TweetDO> tdoList, int i, int iteration) {
+	// TODO Auto-generated method stub
+	File file = new File("clusters" + iteration);
+	if (!file.exists()) {
+	    file.mkdir();
+	}
+	StringBuilder sb = new StringBuilder();
+	for (int j = 0; j < tdoList.size(); j++) {
+	    TweetDO tdo = tdoList.get(j);
+	    sb.append(tdo.getTextTweet().trim() + " , "
+		    + tdo.getDateTextTweet().trim() + " , " + tdo.getId()
+		    + " , " + tdo.getLocTweet().trim() + "\n");
+	}
+	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
+		.toString().trim());
+
+    }
+
 }

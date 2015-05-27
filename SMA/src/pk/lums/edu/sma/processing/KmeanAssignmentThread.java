@@ -31,7 +31,7 @@ public class KmeanAssignmentThread extends Thread {
 	int i = 0;
 	for (Map.Entry<Integer, double[]> entry : vecSpaceMap.entrySet()) {
 	    i++;
-	    if (i % 100 == 0)
+	    if (i % 1000 == 0)
 		IOUtils.log(this.getName() + " : " + i);
 	    double[] cent = null;
 	    double sim = 0;

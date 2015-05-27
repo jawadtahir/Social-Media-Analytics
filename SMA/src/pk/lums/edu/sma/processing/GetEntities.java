@@ -56,8 +56,10 @@ public class GetEntities extends Thread {
 		continue;
 	    }
 	    count++;
-	    IOUtils.log("Thread " + this.getName() + " : Count : " + count
-		    + " Tweet : " + tweet);
+	    if (count % 1000 == 0) {
+		IOUtils.log("Thread " + this.getName() + " : Count : " + count
+			+ " Tweet : " + tweet);
+	    }
 	    // run annotation on all documents
 	    Annotation document = new Annotation(tweet);
 	    pipeline.annotate(document);
