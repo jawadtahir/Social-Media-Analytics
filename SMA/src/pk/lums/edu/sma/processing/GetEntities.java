@@ -71,24 +71,24 @@ public class GetEntities extends Thread {
 		    String word = token.get(TextAnnotation.class);
 		    String pos = token.get(PartOfSpeechAnnotation.class);
 		    String ne = token.get(NamedEntityTagAnnotation.class);
-		    if (pos.equals("HT")) {
-			String ht = removeHash(word.toLowerCase().trim());
-			if (ht.length() > 1) {
-			    try {
-				if (entities.containsKey(ht)) {
-				    entities.put(ht, entities.get(ht) + 1);
-				} else {
-				    entities.put(ht, 1);
-				}
-			    } catch (Exception ex) {
-				IOUtils.log(ex.getMessage());
-				continue;
-			    }
-			}
-
-		    }
+		    // if (pos.equals("HT")) {
+		    // String ht = removeHash(word.toLowerCase().trim());
+		    // if (ht.length() > 1) {
+		    // try {
+		    // if (entities.containsKey(ht)) {
+		    // entities.put(ht, entities.get(ht) + 1);
+		    // } else {
+		    // entities.put(ht, 1);
+		    // }
+		    // } catch (Exception ex) {
+		    // IOUtils.log(ex.getMessage());
+		    // continue;
+		    // }
+		    // }
+		    //
+		    // }
 		    if (!ne.equals("O")) {
-			if (isEntity(ne) && word.length() > 1) {
+			if (isEntity(ne) && word.length() > 3) {
 			    try {
 				if (entities.containsKey(word.toLowerCase())) {
 				    entities.put(

@@ -12,6 +12,9 @@ import java.util.Map;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
+import twitter4j.HashtagEntity;
+import twitter4j.Status;
+import twitter4j.TwitterObjectFactory;
 
 public class TweetProcessing {
 
@@ -27,23 +30,50 @@ public class TweetProcessing {
 	Connection con = null;
 	PreparedStatement pst = null;
 	ResultSet res = null;
+	// Creating a synchronized hashed map so that all threads can share data
+	entityMap = Collections.synchronizedMap(entityMap);
 	IOUtils.log("Reading Tweets....");
 	// Reading tweets
 	try {
 	    con = IOUtils.getConnection();
+	    pst = con.prepareStatement(TweetDO.SELECT_JSON_QUERY_US);
+	    res = pst.executeQuery();
+	    IOUtils.log(Calendar.getInstance().getTime().toString());
+	    IOUtils.log("getting hashtags....");
+	    getHashTags(res);
+	    IOUtils.log(Calendar.getInstance().getTime().toString());
+	    // IOUtils.log("Converting Tweets into array....");
+	    // // getting tweets from result set
+	    // strTwtList = TweetDO.getTextArrayOfColumn(res, "jsonTweet");
+	    // IOUtils.log(Calendar.getInstance().getTime().toString());
+	    res.close();
+	    pst.close();
+	    con.close();
+	} catch (SQLException e1) {
+	    e1.printStackTrace();
+	}
+	res = null;
+	pst = null;
+	con = null;
+	try {
+	    IOUtils.log("Reading Tweets....");
+	    con = IOUtils.getConnection();
 	    pst = con.prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY_US);
 	    res = pst.executeQuery();
+	    // IOUtils.log(Calendar.getInstance().getTime().toString());
+	    // IOUtils.log("getting hashtags....");
+	    // getHashTags(res);
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Converting Tweets into array....");
 	    // getting tweets from result set
 	    strTwtList = TweetDO.getTextArrayOfColumn(res, "textTweet");
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
+	    res.close();
+	    pst.close();
 	    con.close();
 	} catch (SQLException e1) {
 	    e1.printStackTrace();
 	}
-	// Creating a synchronized hashed map so that all threads can share data
-	entityMap = Collections.synchronizedMap(entityMap);
 	// Empty out cluster folder
 	// IOUtils.clearClusterFolder();
 	// IOUtils.log("Populating tweet array list....");
@@ -52,6 +82,11 @@ public class TweetProcessing {
 	// strTwtList.add(tweet);
 	// }
 
+	res = null;
+	pst = null;
+	con = null;
+
+	System.gc();
 	// This number of tweets will be assigned to each thread
 	int noOfTweetsPerThread = strTwtList.size() / NO_OF_THREADS;
 	ArrayList<GetEntities> threadList = new ArrayList<GetEntities>();
@@ -92,12 +127,12 @@ public class TweetProcessing {
 	// over.....
 	IOUtils.writeFile("Entities.txt", entityMap.toString(), false);
 	IOUtils.log(entityMap.toString());
-	topEntities = IOUtils.getTopNEntities(entityMap, entityMap.size() / 4);
+	topEntities = IOUtils.getTopNEntities(entityMap, 100);
 	StringBuilder sb = new StringBuilder();
 	for (String tempStr : topEntities) {
 	    sb.append(tempStr + " , ");
 	}
-	IOUtils.writeFile("TopEnt.txt", sb.toString());
+	IOUtils.writeFile("TopEnt.txt", sb.toString(), false);
 	IOUtils.log("Going to process entities....");
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);
@@ -136,5 +171,31 @@ public class TweetProcessing {
 	    retList.add(tweet);
 	}
 	return retList.toArray(new String[retList.size()]);
+    }
+
+    private static void getHashTags(ResultSet res) {
+	int count = 0;
+	try {
+	    while (res.next()) {
+		count++;
+		if (count % 10000 == 0) {
+		    IOUtils.log(Integer.toString(count));
+		}
+		Status status = TwitterObjectFactory.createStatus(res
+			.getString(1));
+		HashtagEntity hts[] = status.getHashtagEntities();
+		for (HashtagEntity ht : hts) {
+		    String htag = ht.getText().trim().toLowerCase();
+		    if (entityMap.containsKey(htag)) {
+			entityMap.put(htag, entityMap.get(htag) + 1);
+		    } else {
+			entityMap.put(htag, 1);
+		    }
+		}
+	    }
+	} catch (Exception e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 }

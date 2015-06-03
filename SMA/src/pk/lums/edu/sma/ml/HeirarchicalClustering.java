@@ -9,17 +9,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.utils.IOUtils;
-import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.filters.Filter;
@@ -31,12 +28,16 @@ public class HeirarchicalClustering {
 
     public static void main(String[] args) {
 	ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-	String entss = IOUtils.readFile("Entities2.txt")[0];
-	entss = entss.substring(1, entss.length() - 1);
-	for (String temp : entss.split(",")) {
-	    if (temp.length() > 2) {
-		attributes.add(new Attribute(temp.trim()));
-		topEntList.add(temp);
+	String entss[] = IOUtils.readFile("EntLine.csv");
+
+	// entss = entss.substring(1, entss.length() - 1);
+	int countE = 0;
+	for (String temp : entss) {
+	    countE++;
+	    if (countE <= 100) {
+		String temp2 = temp.split(", ")[0];
+		attributes.add(new Attribute(temp2.trim()));
+		topEntList.add(temp2);
 	    }
 	}
 	Attribute idAttr = new Attribute("idTWEETDTA");
@@ -91,42 +92,43 @@ public class HeirarchicalClustering {
 	IOUtils.log("Going for main course...");
 	ArffSaver saver = new ArffSaver();
 	try {
-	    saver.setFile(new File("testWeka.arff"));
-	    saver.setInstances(filteredInstance);
+	    saver.setFile(new File("testWekaID.arff"));
+	    saver.setInstances(instances);
 	    saver.writeBatch();
 	} catch (IOException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
 
-	Map<Integer, ArrayList<Integer>> clusterMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
-	HierarchicalClusterer clusterer = new HierarchicalClusterer();
-	try {
-	    clusterer.setNumClusters(20);
-	    clusterer.buildClusterer(filteredInstance);
-	    clusterer.setPrintNewick(true);
-	    System.out.println(clusterer.graph());
-	} catch (Exception e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-
-	for (Instance instance : filteredInstance) {
-	    try {
-		int clustNum = clusterer.clusterInstance(instance);
-		int tweetID = (int) ((instances.get(filteredInstance
-			.indexOf(instance))).value(idAttr));
-		insertClusterMap(clusterMap, clustNum, tweetID);
-	    } catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
-	}
-
-	IOUtils.log(Calendar.getInstance().getTime().toString());
-	IOUtils.log("Printing Clusters");
-	System.out.println(clusterMap);
-	printClusters(clusterMap, 5);
+	// Map<Integer, ArrayList<Integer>> clusterMap = new
+	// LinkedHashMap<Integer, ArrayList<Integer>>();
+	// HierarchicalClusterer clusterer = new HierarchicalClusterer();
+	// try {
+	// clusterer.setNumClusters(20);
+	// clusterer.buildClusterer(filteredInstance);
+	// clusterer.setPrintNewick(true);
+	// System.out.println(clusterer.graph());
+	// } catch (Exception e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	//
+	// for (Instance instance : filteredInstance) {
+	// try {
+	// int clustNum = clusterer.clusterInstance(instance);
+	// int tweetID = (int) ((instances.get(filteredInstance
+	// .indexOf(instance))).value(idAttr));
+	// insertClusterMap(clusterMap, clustNum, tweetID);
+	// } catch (Exception e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// IOUtils.log(Calendar.getInstance().getTime().toString());
+	// IOUtils.log("Printing Clusters");
+	// System.out.println(clusterMap);
+	// printClusters(clusterMap, 5);
 
     }
 

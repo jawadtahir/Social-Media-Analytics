@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.processing;
+package pk.lums.edu.sma.ml;
 
 import java.io.File;
 import java.sql.Connection;
@@ -21,11 +21,16 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
+import pk.lums.edu.sma.processing.KmeanAssignmentThread;
+import pk.lums.edu.sma.processing.ProcessEntities;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 4;
+    private static final int K = 50;
+    private static final int MAX_ITER = 20;
+    private static final int INIT = 5;
     private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
@@ -35,18 +40,18 @@ public class EntityProcessor {
 	// TODO Auto-generated method stub
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Processing entities...");
-	String[] entityLine = IOUtils.readFile("EntLine.csv");
-	// String csvEntities = entityLine[0].substring(1);
-	// csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
-	// String[] entityArr = csvEntities.split(", ");
+	String[] entityLine = IOUtils.readFile("Entities.txt");
+	String csvEntities = entityLine[0].substring(1);
+	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
+	String[] entityArr = csvEntities.split(", ");
 	Map<String, Double> entityMap = new HashMap<String, Double>();
 	StringBuilder sb = new StringBuilder();
 	int count = 0;
-	for (String entity : entityLine) {
+	for (String entity : entityArr) {
 	    count++;
-	    if (count <= 100) {
+	    if (count <= 200) {
 		// System.out.println(entity);
-		String[] keyVal = entity.split(", ");
+		String[] keyVal = entity.split("=");
 		// if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
 		String key = keyVal[0].trim();
 		int val = Integer.parseInt(keyVal[1]);
@@ -98,7 +103,7 @@ public class EntityProcessor {
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Going for main course...");
 	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
-		vecSpaceList, 20);
+		vecSpaceList, K);
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Printing clusters...");
 	printClusters(cluster);
@@ -134,38 +139,39 @@ public class EntityProcessor {
     private static void printClusters(
 	    HashMap<double[], SortedSet<Integer>> cluster) {
 	// TODO Auto-generated method stub
-	IOUtils.clearClusterFolder();
-	Iterator<double[]> itr = cluster.keySet().iterator();
-	Connection con = null;
-	PreparedStatement pst = null;
-	try {
-	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	int i = 0;
-	while (itr.hasNext()) {
-	    double[] key = itr.next();
-	    SortedSet<Integer> tweets = cluster.get(key);
-	    Iterator<Integer> setItr = tweets.iterator();
-	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
-	    i++;
-	    while (setItr.hasNext()) {
-		int id = setItr.next();
-		try {
-		    pst.setInt(1, id);
-		    List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
-			    .executeQuery());
-		    tdoList.add(tempList.get(0));
-		} catch (SQLException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		}
-	    }
-
-	    printCluster(tdoList, i);
-	}
+	// IOUtils.clearClusterFolder();
+	// Iterator<double[]> itr = cluster.keySet().iterator();
+	// Connection con = null;
+	// PreparedStatement pst = null;
+	// try {
+	// con = IOUtils.getConnection();
+	// pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// }
+	// int i = 0;
+	// while (itr.hasNext()) {
+	// double[] key = itr.next();
+	// SortedSet<Integer> tweets = cluster.get(key);
+	// Iterator<Integer> setItr = tweets.iterator();
+	// List<TweetDO> tdoList = new ArrayList<TweetDO>();
+	// i++;
+	// while (setItr.hasNext()) {
+	// int id = setItr.next();
+	// try {
+	// pst.setInt(1, id);
+	// List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+	// .executeQuery());
+	// tdoList.add(tempList.get(0));
+	// } catch (SQLException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// printCluster(tdoList, i);
+	// }
+	printClusters(cluster, 0);
 
     }
 
@@ -184,6 +190,86 @@ public class EntityProcessor {
 	}
 	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
 		.toString().trim(), false);
+
+    }
+
+    private static void printClusters(
+	    Map<double[], SortedSet<Integer>> clusters, int iteration) {
+	// TODO Auto-generated method stub
+	IOUtils.clearClusterFolder("clusters" + iteration);
+	Iterator<double[]> itr = clusters.keySet().iterator();
+	Connection con = null;
+	PreparedStatement pst = null;
+	try {
+	    con = IOUtils.getConnection();
+	    // pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
+	} catch (SQLException e) {
+	    e.printStackTrace();
+	}
+	int i = 0;
+	while (itr.hasNext()) {
+	    StringBuilder sb = new StringBuilder();
+	    double[] key = itr.next();
+	    SortedSet<Integer> tweets = clusters.get(key);
+	    Iterator<Integer> setItr = tweets.iterator();
+	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
+	    i++;
+	    int count = 0;
+	    sb.append("SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTAUS where idTWEETDTA IN ( ");
+	    while (setItr.hasNext()) {
+		int id = setItr.next();
+		sb.append(id + " ,");
+		count++;
+		// try {
+		// pst.setInt(1, id);
+		// List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
+		// .executeQuery());
+		// tdoList.add(tempList.get(0));
+		// } catch (SQLException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+	    }
+	    sb.deleteCharAt(sb.length() - 1);
+	    sb.append(");");
+	    // IOUtils.log(sb.toString());
+	    if (count != 0) {
+		// System.out.println(sb.toString());
+		try {
+		    pst = con.prepareStatement(sb.toString());
+		    ResultSet res = pst.executeQuery();
+		    List<TweetDO> templist = TweetDO
+			    .translateTextIdDateLocTweetDO(res);
+		    for (TweetDO tweetDO : templist) {
+			tdoList.add(tweetDO);
+		    }
+		} catch (SQLException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
+
+		printCluster(tdoList, i, iteration);
+
+	    }
+	}
+
+    }
+
+    private static void printCluster(List<TweetDO> tdoList, int i, int iteration) {
+	// TODO Auto-generated method stub
+	File file = new File("clusters" + iteration);
+	if (!file.exists()) {
+	    file.mkdir();
+	}
+	StringBuilder sb = new StringBuilder();
+	for (int j = 0; j < tdoList.size(); j++) {
+	    TweetDO tdo = tdoList.get(j);
+	    sb.append(tdo.getTextTweet().trim() + " , "
+		    + tdo.getDateTextTweet().trim() + " , " + tdo.getId()
+		    + " , " + tdo.getLocTweet().trim() + "\n");
+	}
+	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
+		.toString().trim());
 
     }
 
@@ -264,8 +350,7 @@ public class EntityProcessor {
 	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
-	int maxiter = 15;
-	for (int init = 0; init < 3; init++) {
+	for (int init = 0; init < INIT; init++) {
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Round : " + init);
 	    clusters.clear();
@@ -311,6 +396,12 @@ public class EntityProcessor {
 
 		for (KmeanAssignmentThread thread : assThrdLst) {
 		    thread.start();
+		    try {
+			thread.sleep(500);
+		    } catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		    }
 		}
 
 		for (KmeanAssignmentThread thread : assThrdLst) {
@@ -361,15 +452,16 @@ public class EntityProcessor {
 		    newcent += Arrays.toString(x);
 		if (oldcent.equals(newcent))
 		    go = false;
-		if (++iter >= maxiter)
+		if (++iter >= MAX_ITER)
 		    go = false;
 	    }
 	    // System.out.println(clusters.toString()
 	    // .replaceAll("\\[[\\w@]+=", ""));
-	    if (iter < maxiter)
+	    if (iter < MAX_ITER)
 		System.out.println("Converged in " + iter + " steps.");
 	    else
-		System.out.println("Stopped after " + maxiter + " iterations.");
+		System.out
+			.println("Stopped after " + MAX_ITER + " iterations.");
 	    System.out.println("");
 
 	    // calculate similarity sum and map it to the clustering
@@ -383,6 +475,7 @@ public class EntityProcessor {
 	    errorsums.put(sumsim, new HashMap<double[], SortedSet<Integer>>(
 		    clusters));
 	    try {
+		IOUtils.log("printing cluster");
 		printClusters(clusters, init + 1);
 	    } catch (Exception ex) {
 		IOUtils.log(ex.getMessage());
@@ -398,82 +491,6 @@ public class EntityProcessor {
 	HashMap<double[], SortedSet<Integer>> con = errorsums.get(errorsums
 		.lastKey());
 	return con;
-
-    }
-
-    private static void printClusters(
-	    Map<double[], SortedSet<Integer>> clusters, int iteration) {
-	// TODO Auto-generated method stub
-	IOUtils.clearClusterFolder();
-	Iterator<double[]> itr = clusters.keySet().iterator();
-	Connection con = null;
-	PreparedStatement pst = null;
-	try {
-	    con = IOUtils.getConnection();
-	    // pst = con.prepareStatement(TweetDO.SELECT_ALL_FROM_ID_US);
-	} catch (SQLException e) {
-	    e.printStackTrace();
-	}
-	int i = 0;
-	while (itr.hasNext()) {
-	    StringBuilder sb = new StringBuilder();
-	    double[] key = itr.next();
-	    SortedSet<Integer> tweets = clusters.get(key);
-	    Iterator<Integer> setItr = tweets.iterator();
-	    List<TweetDO> tdoList = new ArrayList<TweetDO>();
-	    i++;
-	    sb.append("SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTAUS where idTWEETDTA IN (");
-	    while (setItr.hasNext()) {
-		int id = setItr.next();
-		sb.append(id + " ,");
-
-		// try {
-		// pst.setInt(1, id);
-		// List<TweetDO> tempList = TweetDO.translateAllTweetDO(pst
-		// .executeQuery());
-		// tdoList.add(tempList.get(0));
-		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-	    }
-	    sb.deleteCharAt(sb.length() - 1);
-	    sb.append(");");
-	    IOUtils.log(sb.toString());
-	    System.out.println(sb.toString());
-	    try {
-		pst = con.prepareStatement(sb.toString());
-		ResultSet res = pst.executeQuery();
-		List<TweetDO> templist = TweetDO
-			.translateTextIdDateLocTweetDO(res);
-		for (TweetDO tweetDO : templist) {
-		    tdoList.add(tweetDO);
-		}
-	    } catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	    }
-
-	    printCluster(tdoList, i, iteration);
-	}
-
-    }
-
-    private static void printCluster(List<TweetDO> tdoList, int i, int iteration) {
-	// TODO Auto-generated method stub
-	File file = new File("clusters" + iteration);
-	if (!file.exists()) {
-	    file.mkdir();
-	}
-	StringBuilder sb = new StringBuilder();
-	for (int j = 0; j < tdoList.size(); j++) {
-	    TweetDO tdo = tdoList.get(j);
-	    sb.append(tdo.getTextTweet().trim() + " , "
-		    + tdo.getDateTextTweet().trim() + " , " + tdo.getId()
-		    + " , " + tdo.getLocTweet().trim() + "\n");
-	}
-	IOUtils.writeFile(file.getAbsolutePath() + "/cluster-" + i + ".txt", sb
-		.toString().trim());
 
     }
 

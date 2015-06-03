@@ -18,6 +18,7 @@ public class KmeanAssignmentThread extends Thread {
 	this.vecSpaceMap = vecSpace;
 	this.clusters = cluster;
 	this.t = new Thread(this, Integer.toString(threadName));
+	IOUtils.log(this.getName() + " created");
     }
 
     @Override
@@ -29,10 +30,12 @@ public class KmeanAssignmentThread extends Thread {
     private void process() {
 	// TODO Auto-generated method stub
 	int i = 0;
+	IOUtils.log("In process");
 	for (Map.Entry<Integer, double[]> entry : vecSpaceMap.entrySet()) {
 	    i++;
 	    if (i % 1000 == 0)
-		IOUtils.log(this.getName() + " : " + i + " : " + entry.getKey());
+		IOUtils.log(this.getName() + " : " + i + " : " + entry.getKey()
+			+ " : " + this.getId());
 	    double[] cent = null;
 	    double sim = 0;
 	    for (double[] c : clusters.keySet()) {

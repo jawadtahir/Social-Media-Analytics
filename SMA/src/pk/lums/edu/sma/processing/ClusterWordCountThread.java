@@ -51,7 +51,7 @@ public class ClusterWordCountThread extends Thread {
 	}
 	wordCount = IOUtils.sortByValues(wordCount);
 	// IOUtils.writeFile(fileName.getName(), wordCount.toString(), true);
-	wordCount = getTopNEntities(wordCount, 100);
+	wordCount = getTopNEntities(wordCount, 10);
 
 	System.out.println(fileName.getName() + " : " + wordCount.toString());
 	// ChartCreator cc = new ChartCreator(wordCount, fileName);
