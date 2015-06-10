@@ -28,14 +28,17 @@ public class HeirarchicalClustering {
 
     public static void main(String[] args) {
 	ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-	String entss[] = IOUtils.readFile("EntLine.csv");
+	String[] entityLine = IOUtils.readFile("Entities.txt");
+	String csvEntities = entityLine[0].substring(1);
+	csvEntities = csvEntities.substring(0, csvEntities.length() - 1);
+	String[] entityArr = csvEntities.split(", ");
 
 	// entss = entss.substring(1, entss.length() - 1);
 	int countE = 0;
-	for (String temp : entss) {
+	for (String temp : entityArr) {
 	    countE++;
 	    if (countE <= 100) {
-		String temp2 = temp.split(", ")[0];
+		String temp2 = temp.split("=")[0];
 		attributes.add(new Attribute(temp2.trim()));
 		topEntList.add(temp2);
 	    }

@@ -36,14 +36,28 @@ public class ClusterWordCountThread extends Thread {
 	for (String tweetEnt : tweetEnts) {
 	    TweetDO tdo = stringToDO(tweetEnt);
 	    if (tdo != null) {
-		String[] subStrs = tdo.getTextTweet().split(" ");
-		for (String string : subStrs) {
-		    string = removeHash(string.toLowerCase().trim());
-		    if (entList.contains(string.toLowerCase().trim())) {
-			if (wordCount.containsKey(string)) {
-			    wordCount.put(string, wordCount.get(string) + 1);
+		// String[] subStrs = tdo.getTextTweet().split(" ");
+		// for (String string : subStrs) {
+		// string = removeHash(string.toLowerCase().trim());
+		// if (entList.contains(string.toLowerCase().trim())) {
+		// if (wordCount.containsKey(string)) {
+		// wordCount.put(string, wordCount.get(string) + 1);
+		// } else {
+		// wordCount.put(string, (double) 1);
+		// }
+		// }
+		// }
+		for (String ent : entList) {
+		    int count = 0;
+		    count = countSubstring(tdo.getTextTweet().toLowerCase(),
+			    ent);
+		    if (count != 0) {
+			if (wordCount.containsKey(ent)) {
+			    wordCount.put(ent, wordCount.get(ent) + count);
 			} else {
-			    wordCount.put(string, (double) 1);
+			    wordCount
+				    .put(ent, Double.parseDouble(Integer
+					    .toString(count)));
 			}
 		    }
 		}

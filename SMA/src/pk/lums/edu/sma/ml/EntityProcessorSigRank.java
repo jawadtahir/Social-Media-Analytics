@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.processing;
+package pk.lums.edu.sma.ml;
 
 import java.io.File;
 import java.sql.Connection;
@@ -22,6 +22,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
+import pk.lums.edu.sma.ml.KmeanAssignmentThread;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityProcessorSigRank {

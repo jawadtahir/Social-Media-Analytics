@@ -37,13 +37,15 @@ public class ClusterWordCount {
 	// entityMap = IOUtils.sortByValues(entityMap);
 	// entityMap = getTopNEntities(entityMap, entityMap.size() / 5);
 
-	File file = new File("clusters0");
+	File file = new File("300cluster/clusters0");
 	File[] clusters = file.listFiles();
 	List<ClusterWordCountThread> threadList = new ArrayList<ClusterWordCountThread>();
 	int i = 0;
 	for (File cluster : clusters) {
-	    i++;
-	    threadList.add(new ClusterWordCountThread(i, cluster, entList));
+	    if (cluster.getName().contains("cluster")) {
+		i++;
+		threadList.add(new ClusterWordCountThread(i, cluster, entList));
+	    }
 	}
 	for (ClusterWordCountThread thread : threadList) {
 	    thread.run();

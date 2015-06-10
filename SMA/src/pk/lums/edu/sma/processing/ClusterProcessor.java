@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -14,11 +15,11 @@ public class ClusterProcessor {
     // private static List<ClusterModel> clustModList = null;
     private static List<ProcessClusterThread> clusterThreadList = new ArrayList<ProcessClusterThread>();
     private static List<File> fileList = new ArrayList<File>();
-    private static final int NO_OF_THREADS = 10;
+    private static final int NO_OF_THREADS = 4;
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
-	File relationDir = new File("Relationship");
+	File relationDir = new File("Relationship1");
 	if (!relationDir.exists()) {
 	    relationDir.mkdir();
 	}
@@ -26,7 +27,7 @@ public class ClusterProcessor {
 	clearDir(relationDir.getAbsolutePath());
 
 	System.out.println(Calendar.getInstance().getTime().toString());
-	File clusterDir = new File("clusters1");
+	File clusterDir = new File("clusters0");
 	// clustModList = Collections
 	// .synchronizedList(new ArrayList<ClusterModel>());
 	System.out.println(clusterDir.listFiles().length);
@@ -89,10 +90,10 @@ public class ClusterProcessor {
 	}
 	System.out.println(Calendar.getInstance().getTime().toString());
 	// Collections.sort(clustModList);
-	int noOfFilesPerThread = fileList.size() / NO_OF_THREADS;
+	int noOfFilesPerThread = args.length / NO_OF_THREADS;
 	for (int j = 0; j < NO_OF_THREADS; j++) {
 	    ArrayList<File> clustersForThread = getNextMelements(j
-		    * noOfFilesPerThread, noOfFilesPerThread);
+		    * noOfFilesPerThread, noOfFilesPerThread, args);
 	    ProcessClusterThread cThread = new ProcessClusterThread(fileList,
 		    Integer.toString(j), clustersForThread);
 	    clusterThreadList.add(cThread);
@@ -115,11 +116,14 @@ public class ClusterProcessor {
 
     }
 
-    private static ArrayList<File> getNextMelements(int strtIndex, int offset) {
+    private static ArrayList<File> getNextMelements(int strtIndex, int offset,
+	    String[] args) {
 	ArrayList<File> retList = new ArrayList<File>();
+	List<String> listFileName = Arrays.asList(args);
 	for (int i = 0; i < offset; i++) {
-	    File cluster = fileList.get(strtIndex + i);
-	    retList.add(cluster);
+	    String cluster = listFileName.get(strtIndex + i);
+	    File fCluster = new File(cluster);
+	    retList.add(fCluster);
 	}
 	return retList;
     }

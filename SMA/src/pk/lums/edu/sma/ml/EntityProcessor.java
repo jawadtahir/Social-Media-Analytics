@@ -21,7 +21,6 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
-import pk.lums.edu.sma.processing.KmeanAssignmentThread;
 import pk.lums.edu.sma.processing.ProcessEntities;
 import pk.lums.edu.sma.utils.IOUtils;
 
@@ -29,8 +28,8 @@ public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 4;
     private static final int K = 50;
-    private static final int MAX_ITER = 20;
-    private static final int INIT = 5;
+    private static final int MAX_ITER = 25;
+    private static final int INIT = 3;
     private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
     private static ArrayList<String> topEntList = new ArrayList<String>();
@@ -49,7 +48,7 @@ public class EntityProcessor {
 	int count = 0;
 	for (String entity : entityArr) {
 	    count++;
-	    if (count <= 200) {
+	    if (count <= 500) {
 		// System.out.println(entity);
 		String[] keyVal = entity.split("=");
 		// if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
@@ -397,7 +396,7 @@ public class EntityProcessor {
 		for (KmeanAssignmentThread thread : assThrdLst) {
 		    thread.start();
 		    try {
-			thread.sleep(500);
+			thread.sleep(1000);
 		    } catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -432,11 +431,11 @@ public class EntityProcessor {
 			    temp = Double.parseDouble(a);
 
 			} catch (NumberFormatException ex) {
-			    System.out.println(ex.getMessage());
-			    System.out.println(ex.getCause());
-			    System.out.println(a);
-			    System.out.println(updatec[i]);
-			    System.out.println(clusters.get(cent).size());
+			    // System.out.println(ex.getMessage());
+			    // System.out.println(ex.getCause());
+			    // System.out.println(a);
+			    // System.out.println(updatec[i]);
+			    // System.out.println(clusters.get(cent).size());
 			} finally {
 			    updatec[i] = temp;
 			}
@@ -445,6 +444,7 @@ public class EntityProcessor {
 		    step.put(updatec, new TreeSet<Integer>());
 		}
 		// check break conditions
+		IOUtils.log("check break conditions");
 		String oldcent = "", newcent = "";
 		for (double[] x : clusters.keySet())
 		    oldcent += Arrays.toString(x);
@@ -465,6 +465,7 @@ public class EntityProcessor {
 	    System.out.println("");
 
 	    // calculate similarity sum and map it to the clustering
+	    IOUtils.log("calculate similarity sum and map it to the clustering");
 	    double sumsim = 0;
 	    for (double[] c : clusters.keySet()) {
 		SortedSet<Integer> cl = clusters.get(c);
@@ -474,8 +475,8 @@ public class EntityProcessor {
 	    }
 	    errorsums.put(sumsim, new HashMap<double[], SortedSet<Integer>>(
 		    clusters));
+	    IOUtils.log("printing cluster");
 	    try {
-		IOUtils.log("printing cluster");
 		printClusters(clusters, init + 1);
 	    } catch (Exception ex) {
 		IOUtils.log(ex.getMessage());
@@ -485,8 +486,8 @@ public class EntityProcessor {
 	}
 	// pick the clustering with the maximum similarity sum and print the
 	// filenames and indices
-	System.out.println("Best Convergence:");
-	System.out.println(errorsums.get(errorsums.lastKey()).toString()
+	IOUtils.log("Best Convergence:");
+	IOUtils.log(errorsums.get(errorsums.lastKey()).toString()
 		.replaceAll("\\[[\\w@]+=", ""));
 	HashMap<double[], SortedSet<Integer>> con = errorsums.get(errorsums
 		.lastKey());
