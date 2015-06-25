@@ -171,12 +171,14 @@ public class ProcessClusterThread extends Thread {
 	    sum += ent.getValue();
 	}
 	int instSum = 0;
+	int previousVal = 0;
 	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
 	    N++;
 	    instSum += ent.getValue();
-	    if (instSum > (sum / 2)) {
+	    if (instSum > (sum / 2) && previousVal <= (ent.getValue() / 2)) {
 		break;
 	    }
+	    previousVal = ent.getValue();
 	}
 	return N;
     }
