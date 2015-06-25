@@ -28,7 +28,7 @@ public class EntityProcessor {
 
     private static final int NO_OF_THREADS = 4;
     private static final int K = 50;
-    private static final int MAX_ITER = 25;
+    private static final int MAX_ITER = 70;
     private static final int INIT = 3;
     private static final int FRACTION_OF_TWEETS_TO_PROCESS = 4;
     private static ArrayList<ProcessEntities> threadList = new ArrayList<ProcessEntities>();
@@ -48,13 +48,17 @@ public class EntityProcessor {
 	int count = 0;
 	for (String entity : entityArr) {
 	    count++;
-	    if (count <= 500) {
+	    if (count <= 600) {
 		// System.out.println(entity);
 		String[] keyVal = entity.split("=");
 		// if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
 		String key = keyVal[0].trim();
 		int val = Integer.parseInt(keyVal[1]);
-		entityMap.put(key, (double) val);
+		if (entityMap.containsKey(key)) {
+		    entityMap.put(key, entityMap.get(key) + val);
+		} else {
+		    entityMap.put(key, (double) val);
+		}
 		sb.append(key + ", " + val + "\n");
 		// }
 	    }
@@ -396,7 +400,7 @@ public class EntityProcessor {
 		for (KmeanAssignmentThread thread : assThrdLst) {
 		    thread.start();
 		    try {
-			thread.sleep(1000);
+			Thread.sleep(1000);
 		    } catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -419,8 +423,10 @@ public class EntityProcessor {
 		    double[] updatec = new double[cent.length];
 		    for (int d : clusters.get(cent)) {
 			double[] doc = vecspace.get(d);
-			for (int i = 0; i < updatec.length; i++)
-			    updatec[i] += doc[i];
+			if (doc != null) {
+			    for (int i = 0; i < updatec.length; i++)
+				updatec[i] += doc[i];
+			}
 		    }
 		    for (int i = 0; i < updatec.length; i++) {
 			double temp = 0;
