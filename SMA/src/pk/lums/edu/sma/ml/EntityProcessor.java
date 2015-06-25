@@ -51,16 +51,16 @@ public class EntityProcessor {
 	    if (count <= 600) {
 		// System.out.println(entity);
 		String[] keyVal = entity.split("=");
-		// if (keyVal.length == 2 && keyVal[0].trim().length() > 4) {
-		String key = keyVal[0].trim();
-		int val = Integer.parseInt(keyVal[1]);
-		if (entityMap.containsKey(key)) {
-		    entityMap.put(key, entityMap.get(key) + val);
-		} else {
-		    entityMap.put(key, (double) val);
+		if (keyVal.length == 2 && keyVal[0].trim().length() > 3) {
+		    String key = keyVal[0].trim();
+		    int val = Integer.parseInt(keyVal[1]);
+		    if (entityMap.containsKey(key)) {
+			entityMap.put(key, entityMap.get(key) + val);
+		    } else {
+			entityMap.put(key, (double) val);
+		    }
+		    sb.append(key + ", " + val + "\n");
 		}
-		sb.append(key + ", " + val + "\n");
-		// }
 	    }
 	}
 	// IOUtils.writeFile("EntLine.csv", sb.toString(), false);
