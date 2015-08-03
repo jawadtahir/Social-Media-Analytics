@@ -15,7 +15,7 @@ public class ClusterProcessor {
     // private static List<ClusterModel> clustModList = null;
     private static List<ProcessClusterThread> clusterThreadList = new ArrayList<ProcessClusterThread>();
     private static List<File> fileList = new ArrayList<File>();
-    private static final int NO_OF_THREADS = 4;
+    private static final int NO_OF_THREADS = 1;
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
@@ -27,7 +27,7 @@ public class ClusterProcessor {
 	clearDir(relationDir.getAbsolutePath());
 
 	System.out.println(Calendar.getInstance().getTime().toString());
-	File clusterDir = new File("clusters0");
+	File clusterDir = new File("600cluster/clusters0");
 	// clustModList = Collections
 	// .synchronizedList(new ArrayList<ClusterModel>());
 	System.out.println(clusterDir.listFiles().length);

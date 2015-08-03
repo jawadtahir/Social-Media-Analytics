@@ -175,7 +175,9 @@ public class ProcessClusterThread extends Thread {
 	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
 	    N++;
 	    instSum += ent.getValue();
-	    if (instSum > (sum / 2) && previousVal <= (ent.getValue() / 2)) {
+	    // breaks the loop if current sum is greater that 60% of sum and
+	    // current value is less than even half of previous value.
+	    if (instSum > (3 * (sum / 5)) && ent.getValue() < (previousVal / 2)) {
 		break;
 	    }
 	    previousVal = ent.getValue();

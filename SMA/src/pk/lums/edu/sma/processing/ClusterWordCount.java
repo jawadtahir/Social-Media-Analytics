@@ -29,7 +29,7 @@ public class ClusterWordCount {
 	int count = 0;
 	for (String entity : entityArr) {
 	    count++;
-	    if (count <= 200) {
+	    if (count <= 600) {
 		// System.out.println(entity);
 		entList.add(entity.split("=")[0]);
 	    }
@@ -37,7 +37,7 @@ public class ClusterWordCount {
 	// entityMap = IOUtils.sortByValues(entityMap);
 	// entityMap = getTopNEntities(entityMap, entityMap.size() / 5);
 
-	File file = new File("300cluster/clusters0");
+	File file = new File("600cluster/clusters0");
 	File[] clusters = file.listFiles();
 	List<ClusterWordCountThread> threadList = new ArrayList<ClusterWordCountThread>();
 	int i = 0;
