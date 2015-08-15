@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.processing;
+package pk.lums.edu.sma.models;
 
 import java.util.Date;
 
@@ -8,13 +8,16 @@ public class ClusterModel implements Comparable<ClusterModel> {
     private Date date = null;
     private String cluster = null;
     private int id = 0;
+    private String location = null;
 
-    public ClusterModel(String text, Date date, String cluster, int id) {
+    public ClusterModel(String text, Date date, String cluster, int id,
+	    String location) {
 	super();
 	this.text = text;
 	this.date = date;
 	this.cluster = cluster;
 	this.id = id;
+	this.setLocation(location);
     }
 
     public String getText() {
@@ -49,9 +52,16 @@ public class ClusterModel implements Comparable<ClusterModel> {
 	this.id = id;
     }
 
+    public String getLocation() {
+	return location;
+    }
+
+    public void setLocation(String location) {
+	this.location = location;
+    }
+
     @Override
     public int compareTo(ClusterModel o) {
-	// TODO Auto-generated method stub
 	return this.getDate().compareTo(o.getDate());
     }
 

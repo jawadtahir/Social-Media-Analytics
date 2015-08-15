@@ -16,6 +16,7 @@ import java.util.Map;
 
 import pk.lums.edu.sma.dos.TweetDO;
 import pk.lums.edu.sma.ml.EntityProcessorSigRank;
+import pk.lums.edu.sma.models.EntityPhraseDateModel;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class TweetProcessingSigRank {

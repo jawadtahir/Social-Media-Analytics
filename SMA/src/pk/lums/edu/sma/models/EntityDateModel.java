@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.processing;
+package pk.lums.edu.sma.models;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

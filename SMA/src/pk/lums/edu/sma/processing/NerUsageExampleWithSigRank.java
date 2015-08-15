@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import pk.lums.edu.sma.dos.TweetDO;
+import pk.lums.edu.sma.models.EntityPhraseDateModel;
 import pk.lums.edu.sma.utils.IOUtils;
 import twitter4j.HashtagEntity;
 import twitter4j.Status;

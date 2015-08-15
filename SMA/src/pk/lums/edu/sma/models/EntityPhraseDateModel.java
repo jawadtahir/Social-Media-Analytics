@@ -1,4 +1,4 @@
-package pk.lums.edu.sma.processing;
+package pk.lums.edu.sma.models;
 
 import java.util.Date;
 import java.util.LinkedHashMap;

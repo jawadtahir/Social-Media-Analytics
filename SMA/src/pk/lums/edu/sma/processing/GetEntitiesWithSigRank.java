@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import pk.lums.edu.sma.dos.TweetDO;
+import pk.lums.edu.sma.models.EntityDateModel;
 import pk.lums.edu.sma.utils.IOUtils;
 import twitter4j.Status;
 import twitter4j.TwitterException;

@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import pk.lums.edu.sma.models.ClusterModel;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class ProcessClusterThread extends Thread {
@@ -285,7 +286,7 @@ public class ProcessClusterThread extends Thread {
 		    }
 		    if (isInRange(date, dateRange)) {
 			ClusterModel cModel = new ClusterModel(sb.toString(),
-				date, clusterName, Integer.parseInt(id));
+				date, clusterName, Integer.parseInt(id), loc);
 			clustModList.add(cModel);
 		    }
 		} catch (ParseException e) {
@@ -317,7 +318,7 @@ public class ProcessClusterThread extends Thread {
 			sb.append(tweetEntArr[i]);
 		    }
 		    ClusterModel cModel = new ClusterModel(sb.toString(), date,
-			    clusterName, Integer.parseInt(id));
+			    clusterName, Integer.parseInt(id), loc);
 		    clustModList.add(cModel);
 		} catch (ParseException e) {
 		    e.printStackTrace();
