@@ -36,7 +36,6 @@ public class EntityProcessor {
     private static DecimalFormat df = new DecimalFormat("#.####");
 
     public static void main(String[] args) {
-	// TODO Auto-generated method stub
 	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Processing entities...");
 	String[] entityLine = IOUtils.readFile("Entities.txt");
@@ -132,7 +131,6 @@ public class EntityProcessor {
 	// try {
 	// pThread.join();
 	// } catch (InterruptedException e) {
-	// // TODO Auto-generated catch block
 	// e.printStackTrace();
 	// }
 	// }
@@ -141,7 +139,6 @@ public class EntityProcessor {
 
     private static void printClusters(
 	    HashMap<double[], SortedSet<Integer>> cluster) {
-	// TODO Auto-generated method stub
 	// IOUtils.clearClusterFolder();
 	// Iterator<double[]> itr = cluster.keySet().iterator();
 	// Connection con = null;
@@ -167,7 +164,6 @@ public class EntityProcessor {
 	// .executeQuery());
 	// tdoList.add(tempList.get(0));
 	// } catch (SQLException e) {
-	// // TODO Auto-generated catch block
 	// e.printStackTrace();
 	// }
 	// }
@@ -198,7 +194,6 @@ public class EntityProcessor {
 
     private static void printClusters(
 	    Map<double[], SortedSet<Integer>> clusters, int iteration) {
-	// TODO Auto-generated method stub
 	IOUtils.clearClusterFolder("clusters" + iteration);
 	Iterator<double[]> itr = clusters.keySet().iterator();
 	Connection con = null;
@@ -229,7 +224,6 @@ public class EntityProcessor {
 		// .executeQuery());
 		// tdoList.add(tempList.get(0));
 		// } catch (SQLException e) {
-		// // TODO Auto-generated catch block
 		// e.printStackTrace();
 		// }
 	    }
@@ -247,7 +241,6 @@ public class EntityProcessor {
 			tdoList.add(tweetDO);
 		    }
 		} catch (SQLException e) {
-		    // TODO Auto-generated catch block
 		    e.printStackTrace();
 		}
 
@@ -259,7 +252,6 @@ public class EntityProcessor {
     }
 
     private static void printCluster(List<TweetDO> tdoList, int i, int iteration) {
-	// TODO Auto-generated method stub
 	File file = new File("clusters" + iteration);
 	if (!file.exists()) {
 	    file.mkdir();
@@ -402,7 +394,6 @@ public class EntityProcessor {
 		    try {
 			Thread.sleep(1000);
 		    } catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		    }
 		}
@@ -411,7 +402,6 @@ public class EntityProcessor {
 		    try {
 			thread.join();
 		    } catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		    }
 		}

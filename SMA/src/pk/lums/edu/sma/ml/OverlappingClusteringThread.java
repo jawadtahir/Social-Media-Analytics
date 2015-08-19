@@ -2,6 +2,7 @@ package pk.lums.edu.sma.ml;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import pk.lums.edu.sma.utils.IOUtils;
 
 public class OverlappingClusteringThread extends Thread {
 
+    private Thread t = null;
     private List<File> listOfFiles = null;
     private List<String> listOfAttr = null;
     private File currFile = null;
@@ -32,12 +34,14 @@ public class OverlappingClusteringThread extends Thread {
     private static final int INIT = 3;
     private static final int K = 5;
 
-    private static DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    private static DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    private static DecimalFormat decif = new DecimalFormat("#.####");
 
     public OverlappingClusteringThread(List<File> listOfFiles,
-	    List<String> listOfAttr) {
+	    List<String> listOfAttr, String name) {
 	this.listOfAttr = listOfAttr;
 	this.listOfFiles = listOfFiles;
+	this.t = new Thread(this, name);
     }
 
     @Override
@@ -98,7 +102,16 @@ public class OverlappingClusteringThread extends Thread {
 	    String clusterName) {
 	List<ClusterModel> list = new ArrayList<ClusterModel>();
 	String[] tweetEnts = IOUtils.readFile(tempFile.getAbsolutePath());
+	int counter = 0;
 	for (String tweetEnt : tweetEnts) {
+	    // if (counter % 1000 == 0) {
+	    // try {
+	    // // Thread.sleep(50);
+	    // } catch (InterruptedException e) {
+	    // // TODO Auto-generated catch block
+	    // e.printStackTrace();
+	    // }
+	    // }
 	    StringBuilder sb = new StringBuilder(tweetEnt);
 	    sb.append("  ");
 	    String[] tweetEntArr = sb.toString().split(" , ");
@@ -106,12 +119,12 @@ public class OverlappingClusteringThread extends Thread {
 		String loc = tweetEntArr[tweetEntArr.length - 1].trim();
 		String id = tweetEntArr[tweetEntArr.length - 2].trim();
 		String time = tweetEntArr[tweetEntArr.length - 3].trim();
-		time = time.replace(",", "");
+		time = time.replace(",", "").trim();
 		Date date = null;
 		try {
 		    date = df.parse(time);
 		    sb = new StringBuilder();
-		    for (int i = 0; i <= tweetEntArr.length - 4; i++) {
+		    for (int i = 1; i <= tweetEntArr.length - 4; i++) {
 			sb.append(tweetEntArr[i]);
 		    }
 		    ClusterModel cModel = new ClusterModel(sb.toString(), date,
@@ -156,6 +169,8 @@ public class OverlappingClusteringThread extends Thread {
 	HashMap<double[], TreeSet<Integer>> step = new HashMap<double[], TreeSet<Integer>>();
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
+	// Getting keyset of LINKED hashmap so that we can use indexing
+	List<Integer> idList = getKeySetAsList(vecspace);
 	for (int init = 0; init < INIT; init++) {
 	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("Round : " + init);
@@ -165,8 +180,8 @@ public class OverlappingClusteringThread extends Thread {
 	    // randomly initialize cluster centers
 	    while (rand.size() < k) {
 		int randNo = (int) ((Math.random() * vecspace.size()));
-		if (vecspace.get(randNo) != null)
-		    rand.add(randNo);
+		if (vecspace.get(idList.get(randNo)) != null)
+		    rand.add(idList.get(randNo));
 	    }
 	    for (int r : rand) {
 		double[] temp = new double[vecspace.get(r).length];
@@ -265,7 +280,7 @@ public class OverlappingClusteringThread extends Thread {
 			double temp = 0;
 			String a = "";
 			try {
-			    a = df.format(updatec[i]
+			    a = decif.format(updatec[i]
 				    / clusters.get(cent).size());
 			    temp = Double.parseDouble(a);
 
@@ -334,6 +349,17 @@ public class OverlappingClusteringThread extends Thread {
 
     }
 
+    private List<Integer> getKeySetAsList(
+	    LinkedHashMap<Integer, double[]> vecspace) {
+	// TODO Auto-generated method stub
+	List<Integer> retList = new ArrayList<Integer>();
+	for (Iterator<Integer> it = vecspace.keySet().iterator(); it.hasNext();) {
+	    retList.add(it.next());
+	}
+
+	return retList;
+    }
+
     private void printClusters(Map<double[], SortedSet<Integer>> clusters,
 	    int iteration) {
 	int i = 0;
@@ -357,13 +383,9 @@ public class OverlappingClusteringThread extends Thread {
 	StringBuilder sb = new StringBuilder();
 	for (int j = 0; j < tdoList.size(); j++) {
 	    ClusterModel tdo = tdoList.get(j);
-	    try {
-		sb.append(tdo.getText().trim() + " , "
-			+ df.parse(tdo.getDate().toString()).toString() + " , "
-			+ tdo.getId() + " , " + tdo.getLocation().trim() + "\n");
-	    } catch (ParseException e) {
-		e.printStackTrace();
-	    }
+	    sb.append(tdo.getText().trim() + " , "
+		    + df.format(tdo.getDate()).toString() + " , " + tdo.getId()
+		    + " , " + tdo.getLocation().trim() + "\n");
 	}
 	IOUtils.writeFile(currFile.getAbsolutePath() + "/cluster-" + i + "_"
 		+ iteration + ".txt", sb.toString().trim());

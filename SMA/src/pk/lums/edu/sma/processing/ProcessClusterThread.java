@@ -29,7 +29,7 @@ public class ProcessClusterThread extends Thread {
     private List<File> allFileArr = null;
     private String name = null;
     private ArrayList<File> fileArr = null;
-    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     Thread t = null;
 
     public ProcessClusterThread(List<File> filesToProc, String name,
@@ -42,12 +42,10 @@ public class ProcessClusterThread extends Thread {
 
     @Override
     public void run() {
-	// TODO Auto-generated method stub
 	process();
     }
 
     private void process() {
-	// TODO Auto-generated method stub
 	File relationDir = new File("Relationship1");
 	if (!relationDir.exists()) {
 	    relationDir.mkdir();
@@ -74,7 +72,7 @@ public class ProcessClusterThread extends Thread {
 	    }
 	    IOUtils.writeFile(tempFile.getAbsolutePath() + "/" + cClusterName
 		    + ".txt", sbTemp.toString(), false);
-	    Date[] dateRange = getRange(tweetsEnt);
+	    Date[] dateRange = getRange(cClustMod);
 	    for (File rFile : allFileArr) {
 		StringBuilder sb = new StringBuilder();
 		if (!rFile.getName().equals(cFile.getName())) {
@@ -102,6 +100,24 @@ public class ProcessClusterThread extends Thread {
 
 	}
 
+    }
+
+    private Date[] getRange(List<ClusterModel> cClustMod) {
+	Map<Date, Integer> dateMap = new LinkedHashMap<Date, Integer>();
+	SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+	for (ClusterModel model : cClustMod) {
+	    try {
+		Date date = formatter.parse(formatter.format(model.getDate()));
+		IOUtils.insertInMap(dateMap, date);
+	    } catch (ParseException e) {
+		e.printStackTrace();
+	    }
+	}
+	dateMap = IOUtils.sortByValues(dateMap);
+	System.out.println(dateMap);
+	Date range[] = getTopNDateRange(dateMap, findN(dateMap));
+
+	return range;
     }
 
     private boolean isInRange(Date date, Date[] range) {
@@ -151,7 +167,6 @@ public class ProcessClusterThread extends Thread {
 		    // }
 		    tweetCount++;
 		} catch (ParseException e) {
-		    // TODO Auto-generated catch block
 		    e.printStackTrace();
 		}
 
@@ -165,7 +180,6 @@ public class ProcessClusterThread extends Thread {
     }
 
     private int findN(Map<Date, Integer> dateMap) {
-	// TODO Auto-generated method stub
 	int sum = 0;
 	int N = 0;
 	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {
@@ -187,7 +201,6 @@ public class ProcessClusterThread extends Thread {
     }
 
     private Date[] getTopNDateRange(Map<Date, Integer> dateMap, int i) {
-	// TODO Auto-generated method stub
 	Date minDate = null, maxDate = null;
 	int count = 0;
 	for (Map.Entry<Date, Integer> ent : dateMap.entrySet()) {

@@ -1,5 +1,6 @@
 package pk.lums.edu.sma.models;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ClusterModel implements Comparable<ClusterModel> {
@@ -10,6 +11,8 @@ public class ClusterModel implements Comparable<ClusterModel> {
     private int id = 0;
     private String location = null;
 
+    private SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
     public ClusterModel(String text, Date date, String cluster, int id,
 	    String location) {
 	super();
@@ -18,6 +21,14 @@ public class ClusterModel implements Comparable<ClusterModel> {
 	this.cluster = cluster;
 	this.id = id;
 	this.setLocation(location);
+    }
+
+    public ClusterModel(String text, Date date, String cluster, int id) {
+	super();
+	this.text = text;
+	this.date = date;
+	this.cluster = cluster;
+	this.id = id;
     }
 
     public String getText() {
@@ -69,7 +80,8 @@ public class ClusterModel implements Comparable<ClusterModel> {
     public String toString() {
 	StringBuilder sb = new StringBuilder();
 	sb.append(this.cluster + " , " + this.text + " , "
-		+ this.date.toString());
+		+ df.format(this.date) + " , " + this.id + " , "
+		+ this.getLocation() + " ");
 	return sb.toString();
     }
 

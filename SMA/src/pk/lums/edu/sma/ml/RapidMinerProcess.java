@@ -52,7 +52,7 @@ public class RapidMinerProcess {
 		.getSubprocess(0)
 		.getOperatorByName("Read ARFF")
 		.setParameter("data_file",
-			"/home/jawad/git/Social-Media-Analytics/SMA/testWekaID.arff");
+			"/home/jawad/git/Social-Media-Analytics/SMA/testWekaID1.arff");
 	// Entry entry = location.locateEntry();
 	// if (entry instanceof ProcessEntry) {
 	// Process process = new RepositoryProcessLocation(location).load(null);
@@ -79,7 +79,7 @@ public class RapidMinerProcess {
 	    clustMap.put(clust.getClusterId(), (List) clust.getExampleIds());
 	}
 
-	printClusters(clustMap, 7);
+	printClusters(clustMap, 8);
 	RapidMiner.quit(ExitMode.NORMAL);
 	// use the result(s) as needed, for example if your process just returns
 	// one ExampleSet, use this:

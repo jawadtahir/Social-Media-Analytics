@@ -10,7 +10,7 @@ import java.util.Map;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class OverlappingClustering {
-    private static final int NO_OF_THREADS = 8;
+    private static final int NO_OF_THREADS = 4;
 
     private static List<String> topEntList = new ArrayList<String>();
     private static List<File> listOfOverLapRegions = new ArrayList<File>();
@@ -92,13 +92,19 @@ public class OverlappingClustering {
 	    }
 
 	    // Populate thread list
-	    threadList
-		    .add(new OverlappingClusteringThread(fileList, topEntList));
+	    threadList.add(new OverlappingClusteringThread(fileList,
+		    topEntList, Integer.toString(i)));
 	}
 
 	// Start all threads
 	for (OverlappingClusteringThread thread : threadList) {
-	    thread.run();
+	    thread.start();
+	    try {
+		Thread.sleep(5000);
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
 	}
 
 	// Wait for all the threads to close
