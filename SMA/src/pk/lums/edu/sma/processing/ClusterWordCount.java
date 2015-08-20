@@ -2,7 +2,6 @@ package pk.lums.edu.sma.processing;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +16,7 @@ public class ClusterWordCount {
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Processing entities...");
 	String[] entityLine = IOUtils.readFile("Entities.txt");
 	String csvEntities = entityLine[0].substring(1);

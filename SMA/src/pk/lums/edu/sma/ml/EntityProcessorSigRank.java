@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.dos.TweetDO;
-import pk.lums.edu.sma.ml.KmeanAssignmentThread;
 import pk.lums.edu.sma.utils.IOUtils;
 
 public class EntityProcessorSigRank {
@@ -36,7 +34,7 @@ public class EntityProcessorSigRank {
 
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
-	// // IOUtils.log(Calendar.getInstance().getTime().toString());
+	// //
 	// // IOUtils.log("Processing entities...");
 	// // String[] entityLine = IOUtils.readFile("Entities.txt");
 	// // String csvEntities = entityLine[0].substring(1);
@@ -74,7 +72,6 @@ public class EntityProcessorSigRank {
 
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Selecting all tweets...");
 	List<TweetDO> tweets = null;
 	try {
@@ -88,7 +85,6 @@ public class EntityProcessorSigRank {
 
 	// tweets = tweets.subList(0, 100);
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Creating vector space of all tweets...");
 	LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
@@ -106,14 +102,12 @@ public class EntityProcessorSigRank {
 	    }
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Going for main course...");
 	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
 		vecSpaceList, 20);
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Printing clusters...");
 	printClusters(cluster);
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 
     }
 

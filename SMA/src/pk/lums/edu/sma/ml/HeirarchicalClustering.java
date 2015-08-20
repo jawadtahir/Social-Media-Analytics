@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class HeirarchicalClustering {
 	Attribute idAttr = new Attribute("idTWEETDTA");
 	attributes.add(idAttr);
 	int idAttrIndex = attributes.size();
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Selecting all tweets...");
 	List<TweetDO> tweets = null;
 	try {
@@ -60,7 +59,7 @@ public class HeirarchicalClustering {
 	    IOUtils.log("ERROR: Error getting connection String");
 	    System.exit(0);
 	}
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Creating vector space of all tweets...");
 	Instances instances = new Instances("Weka test", attributes,
 		tweets.size());
@@ -91,7 +90,6 @@ public class HeirarchicalClustering {
 	    e1.printStackTrace();
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Going for main course...");
 	ArffSaver saver = new ArffSaver();
 	try {
@@ -128,7 +126,7 @@ public class HeirarchicalClustering {
 	// }
 	// }
 	//
-	// IOUtils.log(Calendar.getInstance().getTime().toString());
+	//
 	// IOUtils.log("Printing Clusters");
 	// System.out.println(clusterMap);
 	// printClusters(clusterMap, 5);

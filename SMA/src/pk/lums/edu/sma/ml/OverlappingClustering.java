@@ -2,7 +2,6 @@ package pk.lums.edu.sma.ml;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +26,7 @@ public class OverlappingClustering {
      */
     public static void main(String[] args) {
 	// TODO Auto-generated method stub
-	IOUtils.log(Calendar.getInstance().getTime().toString());
-	IOUtils.log("Processing entities...");
+	IOUtils.log("Reading entities...");
 	// Read attributes
 	String[] entityLine = IOUtils.readFile(args[0]);
 	// Remove braces from the start and end
@@ -64,10 +62,16 @@ public class OverlappingClustering {
 	    topEntList.add(entity.getKey().trim().toLowerCase());
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+	IOUtils.log("Creating threads...");
+
 	File dir = new File(args[1]);
 	// Create a list of overlapped regions in the given directory
-	for (String clusterName : dir.list()) {
+	for (File cluster : dir.listFiles()) {
+	    String clusterName = cluster.getName();
+	    if (cluster.isDirectory()) {
+		IOUtils.deleteDir(cluster);
+		continue;
+	    }
 	    // removing extension from the name
 	    clusterName = clusterName.replace(".txt", "");
 	    if (!clusterName.equals(args[2])) {
@@ -97,6 +101,9 @@ public class OverlappingClustering {
 	}
 
 	// Start all threads
+
+	IOUtils.log("Starting threads...");
+
 	for (OverlappingClusteringThread thread : threadList) {
 	    thread.start();
 	    try {
@@ -108,6 +115,9 @@ public class OverlappingClustering {
 	}
 
 	// Wait for all the threads to close
+
+	IOUtils.log("Waiting for threads to die...");
+
 	for (OverlappingClusteringThread thread : threadList) {
 	    try {
 		thread.join();
@@ -116,5 +126,8 @@ public class OverlappingClustering {
 		e.printStackTrace();
 	    }
 	}
+
+	IOUtils.log("Process finished.");
+
     }
 }

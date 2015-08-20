@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -186,6 +187,7 @@ public class IOUtils {
     }
 
     public static void log(String text) {
+	text = Calendar.getInstance().getTime().toString() + " \t" + text;
 	IOUtils.writeFile("Log.txt", text, true);
     }
 

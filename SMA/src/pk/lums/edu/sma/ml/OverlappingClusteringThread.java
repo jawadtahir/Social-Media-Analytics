@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,22 +45,43 @@ public class OverlappingClusteringThread extends Thread {
 
     @Override
     public void run() {
+	IOUtils.log(t.getId() + " started work with " + listOfFiles.size()
+		+ " files");
 	process();
+	IOUtils.log(t.getId() + " finished work ");
     }
 
     private void process() {
 	for (File overLap : listOfFiles) {
 	    // make directory to store clusters
+
+	    IOUtils.log(t.getId() + " Creating directory for OL region "
+		    + overLap.getName());
+
 	    if (!overLap.exists()) {
 		overLap.mkdir();
 	    }
 	    currFile = overLap;
 	    File tempFile = new File(overLap.getAbsoluteFile() + ".txt");
+	    // Reading cluster and making a list.
+
+	    IOUtils.log(t.getId() + " Reading OL region " + tempFile.getName());
+
 	    List<ClusterModel> listTweets = readFileAndCreateModel(tempFile,
 		    overLap.getName());
+
+	    if (listTweets.size() == 0) {
+		continue;
+	    }
+
+	    IOUtils.log(t.getId() + " Creating map <id, tweets>");
+	    // Creating map so that we can print quickly instead of calling SQL
+	    // query
 	    tweetMap = makeMap(listTweets);
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
-	    IOUtils.log("Creating vector space of all tweets...");
+
+	    IOUtils.log(t.getId()
+		    + " Creating vector space of all tweets in region...");
+
 	    LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
 	    int count = 0;
@@ -69,7 +89,8 @@ public class OverlappingClusteringThread extends Thread {
 		    .hasNext();) {
 		count++;
 		if (count % 1000 == 0)
-		    IOUtils.log(Integer.toString(count));
+		    IOUtils.log(t.getId() + " " + Integer.toString(count)
+			    + " vector spaces created");
 		ClusterModel tdo = it.next();
 		double[] temp = getVecSpace(tdo.getText());
 		if (temp != null) {
@@ -79,39 +100,41 @@ public class OverlappingClusteringThread extends Thread {
 		}
 	    }
 
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
-	    IOUtils.log("Going for main course...");
+	    IOUtils.log(t.getId() + " Going for main course...");
 	    HashMap<double[], SortedSet<Integer>> cluster = kmean(listTweets,
 		    vecSpaceList, K);
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
-	    IOUtils.log("Printing clusters...");
+
+	    IOUtils.log(t.getId() + " Printing clusters...");
 	    printClusters(cluster, 0);
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	}
     }
 
     private Map<Integer, ClusterModel> makeMap(List<ClusterModel> listTweets) {
 	Map<Integer, ClusterModel> map = new LinkedHashMap<Integer, ClusterModel>();
+	int count = 0;
 	for (ClusterModel cmodel : listTweets) {
+	    count++;
 	    map.put(cmodel.getId(), cmodel);
+	    if (count % 1000 == 0) {
+		IOUtils.log(t.getId() + " creating map... Entries : " + count);
+	    }
 	}
+
+	IOUtils.log(t.getId() + " map created with " + count
+		+ " entries for region " + listTweets.get(0).getCluster());
+
 	return map;
     }
 
     private List<ClusterModel> readFileAndCreateModel(File tempFile,
 	    String clusterName) {
 	List<ClusterModel> list = new ArrayList<ClusterModel>();
+	// Reading file
 	String[] tweetEnts = IOUtils.readFile(tempFile.getAbsolutePath());
 	int counter = 0;
 	for (String tweetEnt : tweetEnts) {
-	    // if (counter % 1000 == 0) {
-	    // try {
-	    // // Thread.sleep(50);
-	    // } catch (InterruptedException e) {
-	    // // TODO Auto-generated catch block
-	    // e.printStackTrace();
-	    // }
-	    // }
+	    counter++;
 	    StringBuilder sb = new StringBuilder(tweetEnt);
 	    sb.append("  ");
 	    String[] tweetEntArr = sb.toString().split(" , ");
@@ -134,7 +157,15 @@ public class OverlappingClusteringThread extends Thread {
 		    e.printStackTrace();
 		}
 	    }
+
+	    if (counter % 1000 == 0) {
+		IOUtils.log(t.getId()
+			+ " creating list of tweets. Current Count : "
+			+ counter + " File : " + tempFile.getName());
+	    }
 	}
+	IOUtils.log(t.getId() + " Created list for " + tempFile.getName()
+		+ ". Size = " + counter);
 	return list;
     }
 
@@ -172,8 +203,8 @@ public class OverlappingClusteringThread extends Thread {
 	// Getting keyset of LINKED hashmap so that we can use indexing
 	List<Integer> idList = getKeySetAsList(vecspace);
 	for (int init = 0; init < INIT; init++) {
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
-	    IOUtils.log("Round : " + init);
+
+	    IOUtils.log(t.getId() + " Round : " + init);
 	    clusters.clear();
 	    step.clear();
 	    rand.clear();
@@ -191,19 +222,18 @@ public class OverlappingClusteringThread extends Thread {
 	    boolean go = true;
 	    int iter = 0;
 	    while (go) {
-		IOUtils.log(Calendar.getInstance().getTime().toString());
-		IOUtils.log("Iter : " + iter);
+
+		IOUtils.log(t.getId() + " Iter : " + iter);
 		clusters = new HashMap<double[], SortedSet<Integer>>(step);
 		// ///////////////////////////////////////////////////////////
 
 		int j = 0;
-		IOUtils.log("In process");
+		IOUtils.log(t.getId() + " In process");
 		for (Map.Entry<Integer, double[]> entry : vecspace.entrySet()) {
 		    j++;
 		    if (j % 1000 == 0)
-			IOUtils.log(Thread.currentThread().getName() + " : "
-				+ j + " : " + entry.getKey() + " : "
-				+ Thread.currentThread().getId());
+			IOUtils.log(t.getId() + " : " + j + " : "
+				+ entry.getKey() + " : " + t.getId());
 		    double[] cent = null;
 		    double sim = 0;
 		    for (double[] c : clusters.keySet()) {
@@ -267,7 +297,7 @@ public class OverlappingClusteringThread extends Thread {
 		// centroid update step
 		step.clear();
 		for (double[] cent : clusters.keySet()) {
-		    IOUtils.log("Updating centroids");
+		    IOUtils.log(t.getId() + " Updating centroids");
 		    double[] updatec = new double[cent.length];
 		    for (int d : clusters.get(cent)) {
 			double[] doc = vecspace.get(d);
@@ -298,7 +328,7 @@ public class OverlappingClusteringThread extends Thread {
 		    step.put(updatec, new TreeSet<Integer>());
 		}
 		// check break conditions
-		IOUtils.log("check break conditions");
+		IOUtils.log(t.getId() + " checking break conditions...");
 		String oldcent = "", newcent = "";
 		for (double[] x : clusters.keySet())
 		    oldcent += Arrays.toString(x);
@@ -319,7 +349,8 @@ public class OverlappingClusteringThread extends Thread {
 	    System.out.println("");
 
 	    // calculate similarity sum and map it to the clustering
-	    IOUtils.log("calculate similarity sum and map it to the clustering");
+	    IOUtils.log(t.getId()
+		    + " calculate similarity sum and map it to the clustering");
 	    double sumsim = 0;
 	    for (double[] c : clusters.keySet()) {
 		SortedSet<Integer> cl = clusters.get(c);
@@ -329,20 +360,24 @@ public class OverlappingClusteringThread extends Thread {
 	    }
 	    errorsums.put(sumsim, new HashMap<double[], SortedSet<Integer>>(
 		    clusters));
-	    IOUtils.log("printing cluster");
+	    IOUtils.log(t.getId() + " printing cluster");
 	    try {
 		printClusters(clusters, init + 1);
 	    } catch (Exception ex) {
 		IOUtils.log(ex.getMessage());
+		IOUtils.log(t.getId() + " Encountered error \n"
+			+ ex.getStackTrace().toString());
 		System.out.println(ex.getMessage());
 	    }
 
 	}
 	// pick the clustering with the maximum similarity sum and print the
 	// filenames and indices
-	IOUtils.log("Best Convergence:");
-	IOUtils.log(errorsums.get(errorsums.lastKey()).toString()
-		.replaceAll("\\[[\\w@]+=", ""));
+	IOUtils.log(t.getId() + " Best Convergence:");
+	IOUtils.log(t.getId()
+		+ " "
+		+ errorsums.get(errorsums.lastKey()).toString()
+			.replaceAll("\\[[\\w@]+=", ""));
 	HashMap<double[], SortedSet<Integer>> con = errorsums.get(errorsums
 		.lastKey());
 	return con;
@@ -351,7 +386,6 @@ public class OverlappingClusteringThread extends Thread {
 
     private List<Integer> getKeySetAsList(
 	    LinkedHashMap<Integer, double[]> vecspace) {
-	// TODO Auto-generated method stub
 	List<Integer> retList = new ArrayList<Integer>();
 	for (Iterator<Integer> it = vecspace.keySet().iterator(); it.hasNext();) {
 	    retList.add(it.next());
@@ -387,8 +421,8 @@ public class OverlappingClusteringThread extends Thread {
 		    + df.format(tdo.getDate()).toString() + " , " + tdo.getId()
 		    + " , " + tdo.getLocation().trim() + "\n");
 	}
-	IOUtils.writeFile(currFile.getAbsolutePath() + "/cluster-" + i + "_"
-		+ iteration + ".txt", sb.toString().trim());
+	IOUtils.writeFile(currFile.getAbsolutePath() + "/" + iteration + "_"
+		+ "cluster-" + i + ".txt", sb.toString().trim());
 
     }
 

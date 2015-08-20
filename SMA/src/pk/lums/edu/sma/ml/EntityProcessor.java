@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +35,7 @@ public class EntityProcessor {
     private static DecimalFormat df = new DecimalFormat("#.####");
 
     public static void main(String[] args) {
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Processing entities...");
 	String[] entityLine = IOUtils.readFile("Entities.txt");
 	String csvEntities = entityLine[0].substring(1);
@@ -70,7 +69,6 @@ public class EntityProcessor {
 	    topEntList.add(entity.getKey().trim().toLowerCase());
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Selecting all tweets...");
 	List<TweetDO> tweets = null;
 	try {
@@ -84,7 +82,6 @@ public class EntityProcessor {
 
 	// tweets = tweets.subList(0, 100);
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Creating vector space of all tweets...");
 	LinkedHashMap<Integer, double[]> vecSpaceList = new LinkedHashMap<Integer, double[]>();
 
@@ -102,14 +99,12 @@ public class EntityProcessor {
 	    }
 	}
 
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("Going for main course...");
 	HashMap<double[], SortedSet<Integer>> cluster = kmean(tweets,
 		vecSpaceList, K);
-	IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	IOUtils.log("Printing clusters...");
 	printClusters(cluster);
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 
 	// IOUtils.log("Creating threads....");
 	// int noOfEntityPerThread = (int) topEntities.length / NO_OF_THREADS;
@@ -346,7 +341,7 @@ public class EntityProcessor {
 	HashSet<Integer> rand = new HashSet<Integer>();
 	TreeMap<Double, HashMap<double[], SortedSet<Integer>>> errorsums = new TreeMap<Double, HashMap<double[], SortedSet<Integer>>>();
 	for (int init = 0; init < INIT; init++) {
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
+
 	    IOUtils.log("Round : " + init);
 	    clusters.clear();
 	    step.clear();
@@ -365,7 +360,7 @@ public class EntityProcessor {
 	    boolean go = true;
 	    int iter = 0;
 	    while (go) {
-		IOUtils.log(Calendar.getInstance().getTime().toString());
+
 		IOUtils.log("Iter : " + iter);
 		clusters = new HashMap<double[], SortedSet<Integer>>(step);
 		List<KmeanAssignmentThread> assThrdLst = new ArrayList<KmeanAssignmentThread>();
