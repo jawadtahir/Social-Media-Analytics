@@ -1,12 +1,17 @@
 package pk.lums.edu.sma.ml;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,7 +25,12 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import pk.lums.edu.sma.models.ClusterModel;
+import pk.lums.edu.sma.processing.GetEntities;
 import pk.lums.edu.sma.utils.IOUtils;
+import twitter4j.HashtagEntity;
+import twitter4j.Status;
+import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
 
 public class OverlappingClusteringAll {
     /**
@@ -40,17 +50,27 @@ public class OverlappingClusteringAll {
     private static final int INIT = 3;
     private static final int NO_OF_THREADS = 4;
     private static File dir = null;
+    private static List<ClusterModel> clusterModelList = null;
+    private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
 
+    /**
+     * This script finds the clustering in all overlap regions.
+     * 
+     * @param args
+     *            First parameter would be the name of directory where all
+     *            overlap regions are stored Second parameter would be the flag
+     *            Y or N to get dynamic feature set Third parameter is number of
+     *            feature set if previous parameter is Y. else it would be the
+     *            name of CSV file where feature set is stored.
+     */
     public static void main(String[] args) {
-	// TODO Auto-generated method stub
-	listOfAttr = getAttributes(args[1]);
 	dir = new File(args[0]);
 	if (dir.isDirectory()) {
 	    // Traverse each file to create data set
 	    IOUtils.log("Process Start with " + dir.listFiles().length
 		    + " files");
 	    // Container to store all data
-	    List<ClusterModel> clusterModelList = new ArrayList<ClusterModel>();
+	    clusterModelList = new ArrayList<ClusterModel>();
 	    for (File clusterFile : dir.listFiles()) {
 		if (!clusterFile.isDirectory()
 			&& clusterFile.getName().contains("cluster")) {
@@ -66,6 +86,8 @@ public class OverlappingClusteringAll {
 		    IOUtils.deleteDir(clusterFile);
 		}
 	    }
+	    entityMap = Collections.synchronizedMap(entityMap);
+	    listOfAttr = getAttributes(args[1], args[2]);
 
 	    IOUtils.log(" Creating map <id, tweets>");
 	    // Creating map so that we can print quickly instead of calling SQL
@@ -102,14 +124,74 @@ public class OverlappingClusteringAll {
 	}
     }
 
-    private static List<String> getAttributes(String flag) {
+    private static List<String> getAttributes(String flag, String thirdParm) {
 	// TODO Auto-generated method stub
 	List<String> retList = new ArrayList<String>();
+
 	if (flag.equalsIgnoreCase("Y")) {
+	    getHashTags();
+	    List<String> tweetList = new ArrayList<String>();
+	    for (ClusterModel cmodel : clusterModelList) {
+		tweetList.add(cmodel.getText());
+	    }
+	    GetEntities thread = new GetEntities(
+		    tweetList.toArray(new String[tweetList.size()]), "1",
+		    entityMap);
+	    thread.start();
+	    try {
+		thread.join();
+	    } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
 
 	} else if (flag.equalsIgnoreCase("N")) {
 	}
 	return retList;
+    }
+
+    private static void getHashTags() {
+	int count = 0;
+	StringBuffer query = new StringBuffer(
+		"SELECT jsonTweet FROM TWEETDATA.TWEETDTAUS where idTWEETDTA IN (");
+	for (ClusterModel cmodel : clusterModelList) {
+	    query.append(cmodel.getId());
+	    query.append(" ,");
+	}
+	query.deleteCharAt(query.length() - 1);
+	query.append(");");
+	Connection con = null;
+	PreparedStatement pst = null;
+	ResultSet res = null;
+	try {
+	    con = IOUtils.getConnection();
+	    pst = con.prepareStatement(query.toString());
+	    res = pst.executeQuery();
+	    while (res.next()) {
+		count++;
+		if (count % 10000 == 0) {
+		    IOUtils.log(Integer.toString(count));
+		}
+		Status status = TwitterObjectFactory.createStatus(res
+			.getString(1));
+		HashtagEntity hts[] = status.getHashtagEntities();
+		for (HashtagEntity ht : hts) {
+		    String htag = ht.getText().trim().toLowerCase();
+		    if (entityMap.containsKey(htag)) {
+			entityMap.put(htag, entityMap.get(htag) + 1);
+		    } else {
+			entityMap.put(htag, 1);
+		    }
+		}
+	    }
+	} catch (SQLException e1) {
+	    // TODO Auto-generated catch block
+	    e1.printStackTrace();
+	} catch (TwitterException e) {
+	    // TODO: handle exception
+	    e.printStackTrace();
+	}
+
     }
 
     private static List<ClusterModel> getClusterModelList(String[] input,
