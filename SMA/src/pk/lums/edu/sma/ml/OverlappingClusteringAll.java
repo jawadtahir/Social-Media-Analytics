@@ -51,7 +51,7 @@ public class OverlappingClusteringAll {
     private static final int NO_OF_THREADS = 4;
     private static File dir = null;
     private static List<ClusterModel> clusterModelList = null;
-    private static Map<String, Integer> entityMap = new HashMap<String, Integer>();
+    private static Map<String, Integer> entityMap = new LinkedHashMap<String, Integer>();
 
     /**
      * This script finds the clustering in all overlap regions.
@@ -60,8 +60,9 @@ public class OverlappingClusteringAll {
      *            First parameter would be the name of directory where all
      *            overlap regions are stored Second parameter would be the flag
      *            Y or N to get dynamic feature set Third parameter is number of
-     *            feature set if previous parameter is Y. else it would be the
-     *            name of CSV file where feature set is stored.
+     *            feature set. Fourth parameter is optional if previous
+     *            parameter is Y. else it would be the name of CSV file where
+     *            feature set is stored.
      */
     public static void main(String[] args) {
 	dir = new File(args[0]);
@@ -82,12 +83,13 @@ public class OverlappingClusteringAll {
 			    clusterName));
 
 		} else {
-		    // is not a text
+		    // is not a text file
 		    IOUtils.deleteDir(clusterFile);
 		}
 	    }
 	    entityMap = Collections.synchronizedMap(entityMap);
-	    listOfAttr = getAttributes(args[1], args[2]);
+	    listOfAttr = getAttributes(args[1], Integer.parseInt(args[2]),
+		    args[3]);
 
 	    IOUtils.log(" Creating map <id, tweets>");
 	    // Creating map so that we can print quickly instead of calling SQL
@@ -124,7 +126,8 @@ public class OverlappingClusteringAll {
 	}
     }
 
-    private static List<String> getAttributes(String flag, String thirdParm) {
+    private static List<String> getAttributes(String flag, int featureSetSize,
+	    String fileName) {
 	// TODO Auto-generated method stub
 	List<String> retList = new ArrayList<String>();
 
@@ -144,8 +147,50 @@ public class OverlappingClusteringAll {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	    }
+	    IOUtils.sortByValues(entityMap);
+	    int count = 0;
+	    for (Map.Entry<String, Integer> ent : entityMap.entrySet()) {
+		if (count < featureSetSize) {
+		    retList.add(ent.getKey().trim().toLowerCase());
+		}
+		count++;
+	    }
+	    return retList;
 
 	} else if (flag.equalsIgnoreCase("N")) {
+	    IOUtils.log("Reading entities...");
+	    // Read attributes
+	    String[] entityLine = IOUtils.readFile(fileName);
+	    // Remove braces from the start and end
+	    String csvEntities = entityLine[0].substring(1,
+		    entityLine[0].length() - 1);
+	    // Split the string so we can get an array of attributes
+	    String[] entityArr = csvEntities.split(", ");
+	    Map<String, Double> entityMap = new HashMap<String, Double>();
+	    int count = 0;
+	    // Create a hash map where key is attribute and value is its count
+	    // in data set
+	    for (String entity : entityArr) {
+		count++;
+		if (count <= featureSetSize) {
+		    // System.out.println(entity);
+		    String[] keyVal = entity.split("=");
+		    if (keyVal.length == 2 && keyVal[0].trim().length() > 3) {
+			String key = keyVal[0].trim();
+			int val = Integer.parseInt(keyVal[1]);
+			if (entityMap.containsKey(key)) {
+			    entityMap.put(key, entityMap.get(key) + val);
+			} else {
+			    entityMap.put(key, (double) val);
+			}
+		    }
+		}
+	    }
+	    entityMap = IOUtils.sortByValues(entityMap);
+	    // Create a list of attributes
+	    for (Map.Entry<String, Double> entity : entityMap.entrySet()) {
+		retList.add(entity.getKey().trim().toLowerCase());
+	    }
 	}
 	return retList;
     }
