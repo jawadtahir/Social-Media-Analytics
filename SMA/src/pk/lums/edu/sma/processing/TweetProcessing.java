@@ -24,9 +24,7 @@ public class TweetProcessing {
     private static String[] topEntities = null;
 
     public static void main(String[] args) {
-	// TODO Auto-generated method stub
 	IOUtils.log("***************************************************************Program start*****************************************************************************");
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	Connection con = null;
 	PreparedStatement pst = null;
 	ResultSet res = null;
@@ -36,12 +34,10 @@ public class TweetProcessing {
 	// Reading tweets
 	try {
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_JSON_QUERY_US);
+	    pst = con.prepareStatement(TweetDO.SELECT_JSON_QUERY_NEW);
 	    res = pst.executeQuery();
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    IOUtils.log("getting hashtags....");
 	    getHashTags(res);
-	    IOUtils.log(Calendar.getInstance().getTime().toString());
 	    // IOUtils.log("Converting Tweets into array....");
 	    // // getting tweets from result set
 	    // strTwtList = TweetDO.getTextArrayOfColumn(res, "jsonTweet");
@@ -58,7 +54,7 @@ public class TweetProcessing {
 	try {
 	    IOUtils.log("Reading Tweets....");
 	    con = IOUtils.getConnection();
-	    pst = con.prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY_US);
+	    pst = con.prepareStatement(TweetDO.SELECT_ALL_TEXT_QUERY_NEW);
 	    res = pst.executeQuery();
 	    // IOUtils.log(Calendar.getInstance().getTime().toString());
 	    // IOUtils.log("getting hashtags....");
@@ -118,21 +114,20 @@ public class TweetProcessing {
 	    }
 	}
 	System.out.println("All threads completed their work.......");
-	IOUtils.log(Calendar.getInstance().getTime().toString());
 	IOUtils.log("All threads completed their work.......");
 	// Sorting entities map
 	entityMap = IOUtils.sortByValues(entityMap);
 	IOUtils.log("Writing Entities on file.... Here are they");
 	// Writing entities on file so in case of any mishap we can start
 	// over.....
-	IOUtils.writeFile("Entities.txt", entityMap.toString(), false);
+	IOUtils.writeFile("EntitiesNEW.txt", entityMap.toString(), false);
 	IOUtils.log(entityMap.toString());
 	topEntities = IOUtils.getTopNEntities(entityMap, 100);
 	StringBuilder sb = new StringBuilder();
 	for (String tempStr : topEntities) {
 	    sb.append(tempStr + " , ");
 	}
-	IOUtils.writeFile("TopEnt.txt", sb.toString(), false);
+	IOUtils.writeFile("TopEntNEW.txt", sb.toString(), false);
 	IOUtils.log("Going to process entities....");
 	// EntityProcessor ep = new EntityProcessor();
 	// ep.process(entityMap);
@@ -144,7 +139,6 @@ public class TweetProcessing {
 	// proEnt.start();
 	// completed = true;
 	// } catch (Exception e) {
-	// // TODO: handle exception
 	// e.printStackTrace();
 	// }// Reading tweets
 
@@ -194,7 +188,6 @@ public class TweetProcessing {
 		}
 	    }
 	} catch (Exception e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
     }

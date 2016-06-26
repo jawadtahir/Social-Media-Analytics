@@ -29,6 +29,7 @@ public class TweetDO {
     public static final String SELECT_TEXT_LIKE_NEW = "SELECT idTWEETDTA, textTweet, dateTextTweet, locationTweet FROM TWEETDATA.TWEETDTANEW where textTweet like ?";
     public static final String SELECT_ALL_FROM_ID_NEW = "select * from TWEETDATA.TWEETDTANEW where idTWEETDTA = ?";
     public static final String SELECT_ALL_QUERY_NEW = "SELECT * FROM TWEETDATA.TWEETDTANEW";
+    public static final String SELECT_JSON_QUERY_NEW = "SELECT jsonTweet FROM TWEETDATA.TWEETDTANEW";
 
     private long id = 0;
     private String jsonTweet = "";

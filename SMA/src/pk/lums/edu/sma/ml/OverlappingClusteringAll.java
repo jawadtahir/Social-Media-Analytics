@@ -38,14 +38,16 @@ public class OverlappingClusteringAll {
      * 
      * @param args
      *            1 param in the path of directory where overlap region are
-     *            placed. 2 param is flag for dynamic feature set
+     *            placed. 2 param is flag for dynamic feature set. 3rd param is
+     *            the featureset size. 4th param is the name of file where
+     *            keywords are stored in case 2nd param is N
      */
 
     private static DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     private static DecimalFormat decif = new DecimalFormat("#.####");
     private static Map<Integer, ClusterModel> tweetMap = null;
     private static List<String> listOfAttr = new ArrayList<String>();
-    private static final int K = 5;
+    private static final int K = 25;
     private static final int MAX_ITER = 50;
     private static final int INIT = 3;
     private static final int NO_OF_THREADS = 4;
@@ -84,11 +86,11 @@ public class OverlappingClusteringAll {
 
 		} else {
 		    // is not a text file
-		    IOUtils.deleteDir(clusterFile);
+		    // IOUtils.deleteDir(clusterFile);
 		}
 	    }
 	    entityMap = Collections.synchronizedMap(entityMap);
-	    listOfAttr = getAttributes(args[1], Integer.parseInt(args[2]),
+	    listOfAttr = getAttributes(dir, args[1], Integer.parseInt(args[2]),
 		    args[3]);
 
 	    IOUtils.log(" Creating map <id, tweets>");
@@ -126,8 +128,8 @@ public class OverlappingClusteringAll {
 	}
     }
 
-    private static List<String> getAttributes(String flag, int featureSetSize,
-	    String fileName) {
+    private static List<String> getAttributes(File dir, String flag,
+	    int featureSetSize, String fileName) {
 	// TODO Auto-generated method stub
 	List<String> retList = new ArrayList<String>();
 
@@ -147,7 +149,9 @@ public class OverlappingClusteringAll {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	    }
-	    IOUtils.sortByValues(entityMap);
+	    entityMap = IOUtils.sortByValues(entityMap);
+	    IOUtils.writeFile(dir.getAbsolutePath() + "/Entities.txt",
+		    entityMap.toString(), false);
 	    int count = 0;
 	    for (Map.Entry<String, Integer> ent : entityMap.entrySet()) {
 		if (count < featureSetSize) {
@@ -166,30 +170,32 @@ public class OverlappingClusteringAll {
 		    entityLine[0].length() - 1);
 	    // Split the string so we can get an array of attributes
 	    String[] entityArr = csvEntities.split(", ");
-	    Map<String, Double> entityMap = new HashMap<String, Double>();
+	    Map<String, Double> entityMap = new LinkedHashMap<String, Double>();
 	    int count = 0;
 	    // Create a hash map where key is attribute and value is its count
 	    // in data set
 	    for (String entity : entityArr) {
-		count++;
-		if (count <= featureSetSize) {
-		    // System.out.println(entity);
-		    String[] keyVal = entity.split("=");
-		    if (keyVal.length == 2 && keyVal[0].trim().length() > 3) {
-			String key = keyVal[0].trim();
-			int val = Integer.parseInt(keyVal[1]);
-			if (entityMap.containsKey(key)) {
-			    entityMap.put(key, entityMap.get(key) + val);
-			} else {
-			    entityMap.put(key, (double) val);
-			}
+		// System.out.println(entity);
+		String[] keyVal = entity.split("=");
+		if (keyVal.length == 2 && keyVal[0].trim().length() > 3) {
+		    String key = keyVal[0].trim();
+		    int val = Integer.parseInt(keyVal[1]);
+		    if (entityMap.containsKey(key)) {
+			entityMap.put(key, entityMap.get(key) + val);
+		    } else {
+			entityMap.put(key, (double) val);
 		    }
 		}
 	    }
 	    entityMap = IOUtils.sortByValues(entityMap);
 	    // Create a list of attributes
 	    for (Map.Entry<String, Double> entity : entityMap.entrySet()) {
-		retList.add(entity.getKey().trim().toLowerCase());
+		count++;
+		if (count <= featureSetSize) {
+		    retList.add(entity.getKey().trim().toLowerCase());
+		} else {
+		    break;
+		}
 	    }
 	}
 	return retList;
@@ -198,7 +204,7 @@ public class OverlappingClusteringAll {
     private static void getHashTags() {
 	int count = 0;
 	StringBuffer query = new StringBuffer(
-		"SELECT jsonTweet FROM TWEETDATA.TWEETDTAUS where idTWEETDTA IN (");
+		"SELECT jsonTweet FROM TWEETDATA.TWEETDTANEW where idTWEETDTA IN (");
 	for (ClusterModel cmodel : clusterModelList) {
 	    query.append(cmodel.getId());
 	    query.append(" ,");
@@ -230,10 +236,8 @@ public class OverlappingClusteringAll {
 		}
 	    }
 	} catch (SQLException e1) {
-	    // TODO Auto-generated catch block
 	    e1.printStackTrace();
 	} catch (TwitterException e) {
-	    // TODO: handle exception
 	    e.printStackTrace();
 	}
 
@@ -241,7 +245,6 @@ public class OverlappingClusteringAll {
 
     private static List<ClusterModel> getClusterModelList(String[] input,
 	    String clusterName) {
-	// TODO Auto-generated method stub
 	List<ClusterModel> list = new ArrayList<ClusterModel>();
 	int counter = 0;
 	for (String tweetEnt : input) {
@@ -355,10 +358,11 @@ public class OverlappingClusteringAll {
 	    ClusterModel tdo = tdoList.get(j);
 	    sb.append(tdo.getText().trim() + " , "
 		    + df.format(tdo.getDate()).toString() + " , " + tdo.getId()
-		    + " , " + tdo.getLocation().trim() + "\n");
+		    + " , " + tdo.getCluster() + " , "
+		    + tdo.getLocation().trim() + "\n");
 	}
-	IOUtils.writeFile(dir.getAbsolutePath() + "/OLC" + "/" + iteration
-		+ "_" + "cluster-" + i + ".txt", sb.toString().trim());
+	IOUtils.writeFile(dir.getAbsolutePath() + "/OLC2" + "/" + iteration
+		+ "_" + "cluster-" + i + ".txt", sb.toString().trim(), false);
 
     }
 
@@ -483,7 +487,7 @@ public class OverlappingClusteringAll {
 		for (KmeanAssignmentThread thread : assThrdLst) {
 		    thread.start();
 		    try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		    } catch (InterruptedException e) {
 			e.printStackTrace();
 		    }
